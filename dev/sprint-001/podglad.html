@@ -1,0 +1,47 @@
+<!doctype html><html lang="pl"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Gawor — pierwszy prototyp</title><style>
+
+
+
+
+:root { --background:#f4f7f5; --foreground:#122920; --primary:#d2fa69; --primary-foreground:#14281d; --ring:#39744e; --border:#d5ded8; }
+* { box-sizing:border-box; }
+body { margin:0; background:var(--background); color:var(--foreground); font-family:Arial,Helvetica,sans-serif; font-size:16px; line-height:1.55; }
+main { max-width:880px; margin:auto; padding:0 24px 32px; }
+header { display:flex; align-items:center; justify-content:space-between; padding:24px 0; border-bottom:1px solid var(--border); }
+.brand { font-size:30px; font-weight:800; text-decoration:none; color:inherit; letter-spacing:-1.5px; }.brand span { color:#3e7e42; }
+.language,.eyebrow { font-size:14px; font-weight:700; letter-spacing:1.4px; }.language { color:#50645a; }
+.practice { padding-top:36px; }.eyebrow { display:flex; align-items:center; gap:10px; color:#3e6751; }
+h1 { font-size:clamp(36px,6vw,54px); line-height:1.08; letter-spacing:-2px; margin:16px 0; }
+.intro { margin:0 0 26px; }.intro span { color:#5d6f65; }
+.player { background:#122920; color:#f5f9f5; padding:28px; border-radius:24px; }
+.player-top { display:flex; justify-content:space-between; color:#c4d3c9; font-size:14px; }.player-top>span:last-child { display:flex; align-items:center; gap:7px; }
+.sentence { font-size:clamp(26px,4vw,36px); font-weight:500; letter-spacing:-.6px; line-height:1.35; margin:30px 0 24px; min-height:3em; }
+.cue { color:#d2fa69; margin-bottom:24px; }
+.play-button { width:100%; min-height:58px; border-radius:14px; font-size:18px; gap:12px; white-space:normal; }
+.status { color:#c4d3c9; font-size:14px; margin:16px 0 0; }
+.set { margin-top:36px; }.set-heading { display:flex; align-items:center; justify-content:space-between; gap:16px; }.set-heading h2 { font-size:20px; margin:0; }.set-heading>span { font-size:14px; color:#5d6f65; }
+ol { list-style:none; padding:0; margin:16px 0; }li { display:flex; gap:18px; padding:18px 10px; border-bottom:1px solid var(--border); border-radius:4px; }li.active { background:#e3eccf; }.number { color:#5d6f65; font-size:14px; padding-top:2px; font-variant-numeric:tabular-nums; }
+footer { color:#5d6f65; font-size:14px; margin-top:28px; }
+@media(min-width:760px) { main { padding-left:48px; padding-right:48px; }.player { padding:36px; } }
+@media(max-width:380px) { main { padding-left:16px; padding-right:16px; }.player { padding:20px; }.intro span { display:block; } }
+
+button{border:0;background:#d2fa69;color:#14281d;cursor:pointer;font-weight:700}button:disabled{opacity:.5;cursor:default}button:focus-visible{outline:3px solid #fff;outline-offset:4px}.notice{padding:12px 16px;background:#e4ebdf;border-radius:12px;font-size:14px;margin:20px 0}select{font:inherit;padding:8px;border-radius:8px;max-width:100%}label{display:block;margin:16px 0}a{color:inherit}
+</style><main><header><span class="brand">gawor<span>.</span></span><span class="language">DE / PL</span></header>
+<section class="practice"><div class="eyebrow">POWTARZANIE</div><h1>Twoje zdania.<br>Twój rytm.</h1><p class="intro">Moje pierwsze 8 zdań · Zestaw przykładowy</p>
+<div class="player"><div class="player-top"><span id="counter">01 / 08</span><span>↻ W pętli</span></div><p class="sentence" id="sentence" lang="de"></p><p class="cue" id="cue" aria-live="polite">Słuchaj → powtarzaj → i jeszcze raz</p><button class="play-button" id="start">▶ Zacznij powtarzać</button><p class="status" id="status" role="status">Sprawdzam dostępność niemieckiego głosu…</p></div>
+<div class="notice">Prototyp do oceny. Pozostaw ekran otwarty. Odtwarzanie przy zablokowanym ekranie nie jest jeszcze gotowe.</div>
+<label for="pace">Czas na powtórzenie</label><select id="pace"><option value="1">Krótszy</option><option value="1.5" selected>Standardowy</option><option value="2">Dłuższy</option></select>
+</section><section class="set"><div class="set-heading"><h2>W tym zestawie</h2><span>8 zdań</span></div><ol id="list"></ol></section><footer>Sprint 001 · Głos syntetyczny · Zapis z rozmowy pojawi się w kolejnym przyroście.</footer></main>
+<script>
+const sentences=[{"id": "01", "de": "Weißt du, was für mich besonders wunderbar war?"}, {"id": "02", "de": "Ich habe meine Produkte verschenkt."}, {"id": "03", "de": "Wie kann man das auf Deutsch sagen?"}, {"id": "04", "de": "Ich habe die Produkte verschickt."}, {"id": "05", "de": "Das war einfacher zu lösen."}, {"id": "06", "de": "Das ist nicht so wild."}, {"id": "07", "de": "Lass uns weitermachen."}, {"id": "08", "de": "Sie konnte das neue Dokument nicht generieren."}];
+const $=id=>document.getElementById(id);
+let index=0,running=false,timer=null,generation=0,voice=null;
+const synth=window.speechSynthesis;
+sentences.forEach((s,i)=>{const li=document.createElement('li');const n=document.createElement('span');n.className='number';n.textContent=String(i+1).padStart(2,'0');const t=document.createElement('span');t.lang='de';t.textContent=s.de;li.append(n,t);$('list').append(li)});
+function render(){$('sentence').textContent=sentences[index].de;$('counter').textContent=String(index+1).padStart(2,'0')+' / 08';[...$('list').children].forEach((li,i)=>li.classList.toggle('active',running&&i===index))}
+function voices(){if(!synth){$('start').disabled=true;$('status').textContent='Ta przeglądarka nie obsługuje syntezy mowy.';return}voice=synth.getVoices().find(v=>v.lang.toLowerCase().startsWith('de'));$('start').disabled=!voice;$('status').textContent=voice?'Gotowe. Głos: '+voice.name:'Brak niemieckiego głosu w tej przeglądarce. Na iPhonie sprawdź w Safari; może być potrzebne pobranie głosu w ustawieniach systemu.'}
+function stop(message){running=false;generation++;clearTimeout(timer);synth?.cancel();$('start').textContent='▶ Wznów od tego zdania';$('cue').textContent=message||'Zatrzymano. Wznów, kiedy chcesz.';render()}
+function speak(){if(!running)return;render();const token=generation;const utterance=new SpeechSynthesisUtterance(sentences[index].de);utterance.lang='de-DE';utterance.voice=voice;utterance.rate=.88;let started=performance.now();utterance.onstart=()=>{started=performance.now();$('cue').textContent='Posłuchaj…'};utterance.onend=()=>{if(!running||token!==generation)return;const seconds=Math.max(.5,(performance.now()-started)/1000);$('cue').textContent='Teraz Ty. Powtórz na głos.';timer=setTimeout(()=>{index=(index+1)%sentences.length;speak()},(seconds*Number($('pace').value)+1)*1000)};utterance.onerror=()=>{if(token===generation&&running)stop('Nie udało się odczytać zdania. Spróbuj ponownie.')};synth.speak(utterance)}
+$('start').onclick=()=>{if(running){stop();return}if(!voice)return;running=true;generation++;$('start').textContent='■ Zatrzymaj';speak()};
+if(synth)synth.onvoiceschanged=voices;render();voices();window.addEventListener('pagehide',()=>stop());
+</script></html>
