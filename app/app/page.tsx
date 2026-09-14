@@ -2,10 +2,11 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Headphones, Pause, Play, Repeat2 } from 'lucide-react';
+import { Headphones, Pause, Play, Repeat2, Upload } from 'lucide-react';
 import sentences from './sentences.json';
 
 type Asset = { file: string; duration: number; timeline: { id: string; start: number; speech_end: number; end: number }[] };
+type Session = { id: string; summary: string; created_at: string; sentences: { german: string }[] };
 
 export default function Home() {
   const audio = useRef<HTMLAudioElement>(null);
@@ -14,6 +15,29 @@ export default function Home() {
   const [position, setPosition] = useState(0);
   const [message, setMessage] = useState('Wczytuję nagranie…');
   const [waiting, setWaiting] = useState(false);
+  const [sessions, setSessions] = useState<Session[]>([]);
+  const [importText, setImportText] = useState('');
+  const [importMessage, setImportMessage] = useState('');
+
+  async function importSession() {
+    setImportMessage('Zapisuję sesję…');
+    try {
+      const response = await fetch('/api/sessions', { method: 'POST', headers: { 'content-type': 'application/json' }, body: importText });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Nie udało się zapisać sesji.');
+      setImportText(''); setImportMessage(`Zapisano sesję (${data.sentence_count} zdań).`);
+      await loadSessions();
+    } catch (error) { setImportMessage(error instanceof Error ? error.message : 'Nie udało się zapisać sesji.'); }
+  }
+
+  async function loadSessions() {
+    try { const response = await fetch('/api/sessions'); if (response.ok) setSessions((await response.json()).sessions); }
+    catch { /* The static audio player remains usable when the database is unavailable. */ }
+  }
+
+  useEffect(() => {
+    void loadSessions();
+  }, []);
 
   useEffect(() => {
     const context = (document as Document & { modelContext?: { registerTool: (tool: unknown, options: { signal: AbortSignal }) => void | Promise<void> } }).modelContext;
@@ -93,6 +117,14 @@ export default function Home() {
           onWaiting={() => setWaiting(true)} onPlaying={() => setWaiting(false)}
           onError={() => { setPlaying(false); setWaiting(false); setMessage('Nie udało się wczytać audio. Sprawdź połączenie i spróbuj ponownie.'); }} />}
       </div>
+    </section>
+    <section className="set import-set" aria-labelledby="import-title">
+      <div className="set-heading"><h2 id="import-title">Dodaj sesję z rozmowy</h2><Upload size={18} aria-hidden="true" /></div>
+      <p className="intro">Wklej JSON z ChatGPT po komendzie „koniec sesji”.</p>
+      <textarea aria-label="JSON sesji" value={importText} onChange={event => setImportText(event.target.value)} placeholder={'{ "session_summary": "...", "sentences": [...] }'} rows={6} />
+      <Button onClick={() => void importSession()} disabled={!importText.trim()}>Zapisz sesję na serwerze</Button>
+      <p className="status" role="status">{importMessage}</p>
+      {sessions.length > 0 && <ol>{sessions.map(session => <li key={session.id}><span>{new Date(session.created_at).toLocaleDateString('pl-PL')}</span> · {session.summary || 'Sesja bez opisu'} ({session.sentences.length} zdań)</li>)}</ol>}
     </section>
     <section className="set" aria-labelledby="set-title"><div className="set-heading"><h2 id="set-title">W tym zestawie</h2><span>8 zdań</span></div>
       <ol>{sentences.map((sentence, number) => <li key={sentence.id} className={playing && number === index ? 'active' : ''}>
