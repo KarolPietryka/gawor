@@ -1,0 +1,75 @@
+{
+  "file": "practice.mp3",
+  "duration": 71.9,
+  "repeats": 1,
+  "pause_factor": 1.5,
+  "pause_extra": 1.0,
+  "timeline": [
+    {
+      "id": "01",
+      "de": "Weißt du, was für mich besonders wunderbar war?",
+      "cycle": 1,
+      "start": 0.0,
+      "speech_end": 4.152,
+      "end": 11.38
+    },
+    {
+      "id": "02",
+      "de": "Ich habe meine Produkte verschenkt.",
+      "cycle": 1,
+      "start": 11.38,
+      "speech_end": 14.5,
+      "end": 20.18
+    },
+    {
+      "id": "03",
+      "de": "Wie kann man das auf Deutsch sagen?",
+      "cycle": 1,
+      "start": 20.18,
+      "speech_end": 23.276,
+      "end": 28.92
+    },
+    {
+      "id": "04",
+      "de": "Ich habe die Produkte verschickt.",
+      "cycle": 1,
+      "start": 28.92,
+      "speech_end": 31.896,
+      "end": 37.36
+    },
+    {
+      "id": "05",
+      "de": "Das war einfacher zu lösen.",
+      "cycle": 1,
+      "start": 37.36,
+      "speech_end": 40.288,
+      "end": 45.68
+    },
+    {
+      "id": "06",
+      "de": "Das ist nicht so wild.",
+      "cycle": 1,
+      "start": 45.68,
+      "speech_end": 48.224,
+      "end": 53.04
+    },
+    {
+      "id": "07",
+      "de": "Lass uns weitermachen.",
+      "cycle": 1,
+      "start": 53.04,
+      "speech_end": 55.536,
+      "end": 60.28
+    },
+    {
+      "id": "08",
+      "de": "Sie konnte das neue Dokument nicht generieren.",
+      "cycle": 1,
+      "start": 60.28,
+      "speech_end": 64.528,
+      "end": 71.9
+    }
+  ],
+  "voice": "de-DE-KatjaNeural",
+  "provider": "edge-tts (demo fixture)"
+}

@@ -6,3 +6,8 @@ node_modules/
 !.env.example
 dist/
 .venv/
+.audio-cache/
+*.tsbuildinfo
+.site-publish/
+*.tar.gz
+node-v*-win-x64/

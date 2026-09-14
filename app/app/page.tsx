@@ -16,6 +16,24 @@ export default function Home() {
   const [waiting, setWaiting] = useState(false);
 
   useEffect(() => {
+    const context = (document as Document & { modelContext?: { registerTool: (tool: unknown, options: { signal: AbortSignal }) => void | Promise<void> } }).modelContext;
+    if (!context) return;
+    const lifecycle = new AbortController();
+    try {
+      void Promise.resolve(context.registerTool({
+        name: 'get_practice_state', description: 'Read current audio playback position and pause state.',
+        inputSchema: { type: 'object', properties: {}, additionalProperties: false },
+        annotations: { readOnlyHint: true },
+        execute(input: unknown) {
+          if (!input || typeof input !== 'object' || Object.keys(input).length) throw new Error('Expected empty object');
+          return { ready: !!audio.current, paused: audio.current?.paused ?? true, position: audio.current?.currentTime ?? 0 };
+        },
+      }, { signal: lifecycle.signal })).catch(() => {});
+    } catch { /* Browsers without WebMCP still support the player. */ }
+    return () => lifecycle.abort();
+  }, []);
+
+  useEffect(() => {
     const controller = new AbortController();
     fetch('/audio/practice.json', { signal: controller.signal }).then(async response => {
       if (!response.ok) throw new Error('missing');
@@ -81,6 +99,6 @@ export default function Home() {
         <span className="number">{String(number + 1).padStart(2, '0')}</span><span lang="de">{sentence.de}</span>
       </li>)}</ol>
     </section>
-    <footer>Głos w nagraniu będzie generowany przez AI. Pierwszy test: dwa obiegi z zablokowanym ekranem.</footer>
+    <footer>Głos wygenerowany przez AI. Pierwszy test: dwa obiegi z zablokowanym ekranem.</footer>
   </main>;
 }

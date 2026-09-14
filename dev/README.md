@@ -7,4 +7,4 @@ Pracujemy przyrostowo: plan sprintu → implementacja → weryfikacja → demons
 - [Ustalenia początkowe](decisions/2026-09-12-kickoff.md).
 - Każdy sprint ma osobny katalog `sprint-NNN` z planem, wynikiem i review. Feedback zapisujemy jako fakty dopiero po wypowiedzi interesariusza. Akceptacji nie domniemujemy.
 
-Status: sprint 001 rozpoczęty. Kolejne sprinty są propozycją, nie zobowiązaniem zakresowym.
+Status: sprint 002 ukończony technicznie. Odtwarzacz z gotowym audio działa lokalnie; sprint 003 jest zaplanowany.
