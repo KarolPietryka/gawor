@@ -1,80 +1,169 @@
-import { env } from 'cloudflare:workers';
+import fixtureSentences from '@/app/sentences.json';
+import { getDatabase } from '@/db';
+import {
+  cleanText,
+  contentDigest,
+  digest,
+  errorResponse,
+  listSessions,
+  normalizeGerman,
+} from '@/lib/sessions';
 
 type IncomingSentence = { german?: unknown; polish?: unknown; note?: unknown };
 type IncomingVocabulary = { german?: unknown; polish?: unknown };
 
-const text = (value: unknown, max: number) => typeof value === 'string' ? value.trim().slice(0, max) : '';
-const json = (data: unknown, status = 200) => Response.json(data, { status });
-
 export async function GET() {
-  await ensureSchema();
-  const sessions = await env.GAWOR_DB.prepare(
-    'SELECT id, summary, created_at FROM sessions ORDER BY created_at DESC',
-  ).all();
-  const sentences = await env.GAWOR_DB.prepare(
-    'SELECT id, session_id, german, polish, note, created_at, updated_at FROM sentences ORDER BY created_at ASC',
-  ).all();
-  const vocabulary = await env.GAWOR_DB.prepare(
-    'SELECT id, session_id, german, polish FROM vocabulary ORDER BY german ASC',
-  ).all();
-  return json({
-    sessions: sessions.results.map(session => ({
-      ...session,
-      sentences: sentences.results.filter(sentence => sentence.session_id === session.id),
-      vocabulary: vocabulary.results.filter(word => word.session_id === session.id),
-    })),
-  });
+  try {
+    return Response.json({ sessions: await listSessions() });
+  } catch (error) {
+    return errorResponse(error);
+  }
 }
 
 export async function POST(request: Request) {
-  await ensureSchema();
-  let body: { session_summary?: unknown; sentences?: IncomingSentence[]; vocabulary?: IncomingVocabulary[] };
-  try { body = await request.json(); } catch { return json({ error: 'Niepoprawny JSON.' }, 400); }
+  let body: {
+    session_summary?: unknown;
+    title?: unknown;
+    sentences?: IncomingSentence[];
+    vocabulary?: IncomingVocabulary[];
+  };
+  try {
+    body = await request.json();
+  } catch {
+    return Response.json({ error: 'Niepoprawny JSON.' }, { status: 400 });
+  }
+
   if (!body || !Array.isArray(body.sentences) || body.sentences.length === 0) {
-    return json({ error: 'Sesja musi zawierać co najmniej jedno zdanie.' }, 400);
+    return Response.json(
+      { error: 'Sesja musi zawierać co najmniej jedno zdanie.' },
+      { status: 400 },
+    );
   }
+  if (body.sentences.length > 100) {
+    return Response.json(
+      { error: 'Jedna sesja może zawierać maksymalnie 100 zdań.' },
+      { status: 400 },
+    );
+  }
+
   const seen = new Set<string>();
-  const cleanSentences = body.sentences.map(item => ({
-    german: text(item?.german, 500), polish: text(item?.polish, 500), note: text(item?.note, 500),
-  })).filter(item => item.german && !seen.has(item.german) && seen.add(item.german));
-  if (!cleanSentences.length) return json({ error: 'Nie znaleziono poprawnych zdań niemieckich.' }, 400);
+  const sentences = body.sentences
+    .map((item) => ({
+      german: normalizeGerman(item?.german),
+      polish: cleanText(item?.polish, 500),
+      note: cleanText(item?.note, 500),
+    }))
+    .filter((item) => {
+      const key = item.german.toLocaleLowerCase('de-DE');
+      if (!item.german || seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  if (!sentences.length) {
+    return Response.json(
+      { error: 'Nie znaleziono poprawnych zdań niemieckich.' },
+      { status: 400 },
+    );
+  }
+
+  let db: D1Database;
+  try {
+    db = getDatabase();
+  } catch (error) {
+    return errorResponse(error);
+  }
   const sessionId = crypto.randomUUID();
+  const practiceSetId = crypto.randomUUID();
   const now = new Date().toISOString();
-  const summary = text(body.session_summary, 1000);
-  const statements: D1PreparedStatement[] = [env.GAWOR_DB.prepare(
-    'INSERT INTO sessions (id, summary, created_at) VALUES (?, ?, ?)',
-  ).bind(sessionId, summary, now)];
-  for (const [index, item] of cleanSentences.entries()) {
-    const id = `${sessionId}-${String(index + 1).padStart(3, '0')}`;
-    const hash = await digest(item.german);
-    statements.push(env.GAWOR_DB.prepare(
-      'INSERT INTO sentences (id, session_id, german, polish, note, text_hash, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-    ).bind(id, sessionId, item.german, item.polish, item.note, hash, now, now));
+  const summary = cleanText(body.session_summary, 1000);
+  const fallbackTitle = summary
+    ? summary.slice(0, 80)
+    : `Sesja ${new Intl.DateTimeFormat('pl-PL').format(new Date())}`;
+  const title = cleanText(body.title, 100) || fallbackTitle;
+  const statements: D1PreparedStatement[] = [
+    db
+      .prepare(
+        'INSERT INTO sessions (id, summary, created_at) VALUES (?, ?, ?)',
+      )
+      .bind(sessionId, summary, now),
+    db
+      .prepare(
+        'INSERT INTO practice_sets (id, session_id, title, created_at, updated_at) VALUES (?, ?, ?, ?, ?)',
+      )
+      .bind(practiceSetId, sessionId, title, now, now),
+  ];
+
+  for (const [position, item] of sentences.entries()) {
+    const sentenceId = crypto.randomUUID();
+    statements.push(
+      db
+        .prepare(
+          'INSERT INTO sentences (id, session_id, german, polish, note, text_hash, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+        )
+        .bind(
+          sentenceId,
+          sessionId,
+          item.german,
+          item.polish,
+          item.note,
+          await digest(item.german),
+          now,
+          now,
+        ),
+    );
+    statements.push(
+      db
+        .prepare(
+          'INSERT INTO practice_set_sentences (practice_set_id, sentence_id, position) VALUES (?, ?, ?)',
+        )
+        .bind(practiceSetId, sentenceId, position),
+    );
   }
-  const words = Array.isArray(body.vocabulary) ? body.vocabulary : [];
+
   const wordSeen = new Set<string>();
-  for (const item of words) {
-    const german = text(item?.german, 120); const polish = text(item?.polish, 240);
-    if (!german || wordSeen.has(german)) continue;
-    wordSeen.add(german);
-    statements.push(env.GAWOR_DB.prepare(
-      'INSERT INTO vocabulary (id, session_id, german, polish) VALUES (?, ?, ?, ?)',
-    ).bind(crypto.randomUUID(), sessionId, german, polish));
+  for (const item of Array.isArray(body.vocabulary) ? body.vocabulary : []) {
+    const german = cleanText(item?.german, 120);
+    const polish = cleanText(item?.polish, 240);
+    const key = german.toLocaleLowerCase('de-DE');
+    if (!german || wordSeen.has(key)) continue;
+    wordSeen.add(key);
+    statements.push(
+      db
+        .prepare(
+          'INSERT INTO vocabulary (id, session_id, german, polish) VALUES (?, ?, ?, ?)',
+        )
+        .bind(crypto.randomUUID(), sessionId, german, polish),
+    );
   }
-  await env.GAWOR_DB.batch(statements);
-  return json({ id: sessionId, summary, sentence_count: cleanSentences.length }, 201);
-}
 
-async function digest(value: string) {
-  const bytes = new TextEncoder().encode(value.toLocaleLowerCase('de-DE'));
-  const hash = await crypto.subtle.digest('SHA-256', bytes);
-  return Array.from(new Uint8Array(hash), byte => byte.toString(16).padStart(2, '0')).join('');
-}
+  const importedHash = await contentDigest(
+    sentences.map((item) => item.german),
+  );
+  const fixtureHash = await contentDigest(
+    fixtureSentences.map((item) => item.de),
+  );
+  if (importedHash === fixtureHash) {
+    statements.push(
+      db
+        .prepare(`INSERT INTO audio_assets
+      (id, practice_set_id, content_hash, status, file_url, voice, pause_multiplier_milli, duration_ms, created_at, updated_at)
+      VALUES (?, ?, ?, 'ready', '/audio/practice.mp3', 'de-DE-KatjaNeural', 1500, 71928, ?, ?)`)
+        .bind(crypto.randomUUID(), practiceSetId, importedHash, now, now),
+    );
+  }
 
-async function ensureSchema() {
-  await env.GAWOR_DB.batch([
-    env.GAWOR_DB.prepare('CREATE TABLE IF NOT EXISTS sessions (id TEXT PRIMARY KEY, summary TEXT NOT NULL DEFAULT \'\', created_at TEXT NOT NULL)'),
-    env.GAWOR_DB.prepare('CREATE TABLE IF NOT EXISTS sentences (id TEXT PRIMARY KEY, session_id TEXT NOT NULL, german TEXT NOT NULL, polish TEXT NOT NULL DEFAULT \'\', note TEXT NOT NULL DEFAULT \'\', text_hash TEXT NOT NULL, created_at TEXT NOT NULL, updated_at TEXT NOT NULL)'),
-    env.GAWOR_DB.prepare('CREATE TABLE IF NOT EXISTS vocabulary (id TEXT PRIMARY KEY, session_id TEXT NOT NULL, german TEXT NOT NULL, polish TEXT NOT NULL DEFAULT \'\', UNIQUE(session_id, german))'),
-  ]);
+  try {
+    await db.batch(statements);
+    return Response.json(
+      {
+        id: sessionId,
+        practice_set_id: practiceSetId,
+        summary,
+        sentence_count: sentences.length,
+      },
+      { status: 201 },
+    );
+  } catch (error) {
+    return errorResponse(error);
+  }
 }

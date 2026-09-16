@@ -29,3 +29,7 @@ Kryteria zakończenia:
 7. Demo i test techniczny przechodzą przed review Karola.
 
 Review: pokazanie pełnego przepływu: rozmowa w czacie → eksport JSON → wysłanie do serwera → odczyt sesji → edycja → wygenerowanie audio → ponowne wejście → ćwiczenie.
+
+## Decyzja implementacyjna
+
+Sesje, zdania, zestawy i metadane audio są zapisywane w trwałej bazie Cloudflare D1. JSON jest wejściem API, ale nie jest przechowywany jako osobny plik. Pliki audio pozostają statycznym fixture do czasu wyboru dynamicznego dostawcy TTS; binding R2 nie jest jeszcze włączony.
