@@ -6,7 +6,9 @@ Wymagane środowisko: Node >=22.13, npm. `npm run dev` uruchamia podgląd, `npm 
 
 Odtwarzacz używa jednego elementu HTML audio z `loop`. Cisza jest w pliku, bez timerów JavaScript. Media Session udostępnia Start/Pauza systemowi. `timeupdate` aktualizuje wyłącznie tekst na ekranie i nie steruje odtwarzaniem.
 
-Wejście odtwarzacza: `public/audio/practice.json` oraz wskazany w nim plik audio. Brak gotowego nagrania jest pokazywany jawnie; przycisk startu pozostaje niedostępny.
+Każdy zapisany zestaw ma własny plik WAV i manifest osi czasu w R2. Endpoint przygotowania audio wysyła tekst wyłącznie z Workera do OpenAI TTS jako PCM 24 kHz, mierzy długość każdego klipu, dodaje po nim dokładnie 1,5× tej długości ciszy i zapisuje wynik. Tekst, kolejność, głos, parametry syntezy i reguła przerwy tworzą wersję nagrania; edycja zestawu unieważnia poprzednią wersję.
+
+Przed wdrożeniem dodaj sekret `OPENAI_API_KEY` do środowiska Workers. Konfiguracja hostingowa wiąże bucket R2 `GAWOR_AUDIO`; klucz nie należy do repozytorium. Bez obu konfiguracji przygotowanie nagrania kończy się widocznym błędem, który można ponowić po ich uzupełnieniu.
 
 Przygotowanie nagrania po uzyskaniu plików PCM WAV z syntezy mowy (01.wav–08.wav, ten sam format), z katalogu nadrzędnego:
 
@@ -14,6 +16,6 @@ Przygotowanie nagrania po uzyskaniu plików PCM WAV z syntezy mowy (01.wav–08.
 python src/audio/assemble.py dev/sprint-001/sentences.json CLIP_DIR app/public/audio/practice.wav
 ```
 
-Generator tworzy również manifest `practice.json`, z czasami zdań i przerw. Zestaw w aplikacji i generatorze musi odpowiadać `sentences.json`. Długi plik wielokrotnych powtórzeń można przygotować parametrem `--repeats`, ale bieżący ekran przyjmuje pojedynczy obieg; wariant długiego pliku wymaga osobnego rozszerzenia po review.
+Generator tworzy również manifest `practice.json`, z czasami zdań i przerw. Jego domyślna przerwa wynosi 1,5× czas mowy bez dodatkowej sekundy. Jest to narzędzie do fixture; aplikacja korzysta z manifestów poszczególnych zestawów zapisanych w R2.
 
 Nie używamy przeglądarkowego speechSynthesis jako zamiennika testu gotowego pliku. Brak usługi syntezy i brak testu na iPhonie oznaczają, że sprint nie jest jeszcze ukończony.

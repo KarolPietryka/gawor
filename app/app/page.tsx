@@ -36,10 +36,7 @@ import {
   Trash2,
   Upload,
 } from 'lucide-react';
-import demoSentences from './sentences.json';
-
-type TimelineItem = { start: number; speech_end: number; end: number };
-type Manifest = { file: string; duration: number; timeline: TimelineItem[] };
+import type { AudioManifest } from '@/lib/audio';
 type Sentence = {
   id: string;
   german: string;
@@ -49,8 +46,9 @@ type Sentence = {
 };
 type AudioAsset = {
   file_url: string | null;
-  status: string;
+  status: 'ready' | 'stale' | 'pending' | 'failed';
   is_current: boolean;
+  manifest: AudioManifest | null;
 };
 type PracticeSession = {
   id: string;
@@ -62,6 +60,17 @@ type PracticeSession = {
 type SentenceDraft = { german: string; polish: string; note: string };
 
 const emptyDraft: SentenceDraft = { german: '', polish: '', note: '' };
+
+function vttTime(seconds: number) {
+  const milliseconds = Math.round(seconds * 1000);
+  const hours = Math.floor(milliseconds / 3_600_000);
+  const minutes = Math.floor((milliseconds % 3_600_000) / 60_000);
+  const wholeSeconds = Math.floor((milliseconds % 60_000) / 1000);
+  const remainder = milliseconds % 1000;
+  return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(
+    wholeSeconds,
+  ).padStart(2, '0')}.${String(remainder).padStart(3, '0')}`;
+}
 
 async function api<T = Record<string, unknown>>(
   url: string,
@@ -83,7 +92,6 @@ async function api<T = Record<string, unknown>>(
 
 export default function Home() {
   const audio = useRef<HTMLAudioElement>(null);
-  const [manifest, setManifest] = useState<Manifest | null>(null);
   const [sessions, setSessions] = useState<PracticeSession[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [view, setView] = useState<'practice' | 'library' | 'import'>(
@@ -91,8 +99,9 @@ export default function Home() {
   );
   const [playing, setPlaying] = useState(false);
   const [waiting, setWaiting] = useState(false);
+  const [preparingAudio, setPreparingAudio] = useState(false);
   const [position, setPosition] = useState(0);
-  const [message, setMessage] = useState('Wczytuję nagranie…');
+  const [message, setMessage] = useState('Wybierz zestaw z biblioteki.');
   const [libraryMessage, setLibraryMessage] = useState('');
   const [importText, setImportText] = useState('');
   const [importMessage, setImportMessage] = useState('');
@@ -103,27 +112,13 @@ export default function Home() {
 
   const selected =
     sessions.find((session) => session.id === selectedId) ?? null;
-  const activeSentences = useMemo(
-    () =>
-      selected
-        ? selected.sentences
-        : demoSentences.map((item, position) => ({
-            id: item.id,
-            german: item.de,
-            polish: '',
-            note: '',
-            position,
-          })),
-    [selected],
-  );
+  const activeSentences = useMemo(() => selected?.sentences ?? [], [selected]);
   const activeAudioUrl = selected
     ? selected.practice_set.audio?.is_current
       ? selected.practice_set.audio.file_url
       : null
-    : manifest
-      ? `/audio/${manifest.file}`
-      : null;
-  const activeTitle = selected?.practice_set.title ?? 'Moje pierwsze 8 zdań';
+    : null;
+  const activeTitle = selected?.practice_set.title ?? 'Wybierz zestaw';
 
   async function loadSessions(preferId?: string) {
     try {
@@ -141,35 +136,6 @@ export default function Home() {
 
   useEffect(() => {
     queueMicrotask(() => void loadSessions());
-  }, []);
-
-  useEffect(() => {
-    const controller = new AbortController();
-    fetch('/audio/practice.json', { signal: controller.signal })
-      .then(async (response) => {
-        if (!response.ok) throw new Error('missing');
-        const data: Manifest = await response.json();
-        if (
-          !/^[a-zA-Z0-9_-]+\.(wav|mp3|m4a)$/.test(data.file) ||
-          !Number.isFinite(data.duration) ||
-          !Array.isArray(data.timeline) ||
-          data.timeline.some(
-            (item) =>
-              ![item.start, item.speech_end, item.end].every(Number.isFinite) ||
-              item.start < 0 ||
-              item.speech_end <= item.start ||
-              item.end <= item.speech_end,
-          )
-        )
-          throw new Error('invalid');
-        setManifest(data);
-        setMessage('Gotowe. Słuchaj i powtarzaj w przerwach.');
-      })
-      .catch(() => {
-        if (!controller.signal.aborted)
-          setMessage('Nagranie nie jest dostępne.');
-      });
-    return () => controller.abort();
   }, []);
 
   useEffect(() => {
@@ -347,27 +313,53 @@ export default function Home() {
   }
 
   async function prepareAudio() {
-    if (!selected) return;
-    setLibraryMessage('Sprawdzam możliwość przygotowania audio…');
+    if (!selected || preparingAudio) return;
+    setPreparingAudio(true);
+    setLibraryMessage('Przygotowuję mowę i przerwy dla całego zestawu…');
     try {
-      await api(`/api/practice-sets/${selected.practice_set.id}/audio`, {
-        method: 'POST',
-      });
+      const result = await api<{ status: 'ready' | 'pending' }>(
+        `/api/practice-sets/${selected.practice_set.id}/audio`,
+        {
+          method: 'POST',
+        },
+      );
       await loadSessions(selected.id);
-      setLibraryMessage('Aktualne audio jest gotowe.');
+      setLibraryMessage(
+        result.status === 'ready'
+          ? 'Aktualne audio jest gotowe.'
+          : 'Audio jest jeszcze przygotowywane. Odśwież bibliotekę za chwilę.',
+      );
     } catch (error) {
       setLibraryMessage(
         error instanceof Error
           ? error.message
           : 'Nie udało się przygotować audio.',
       );
+    } finally {
+      setPreparingAudio(false);
     }
   }
 
-  const timeline =
-    manifest?.timeline.length === activeSentences.length
-      ? manifest.timeline
-      : [];
+  const timeline = useMemo(
+    () =>
+      selected?.practice_set.audio?.is_current &&
+      selected.practice_set.audio.manifest?.timeline.length ===
+        activeSentences.length
+        ? selected.practice_set.audio.manifest.timeline
+        : [],
+    [activeSentences.length, selected],
+  );
+  const captions = useMemo(() => {
+    if (timeline.length !== activeSentences.length) return '';
+    return [
+      'WEBVTT',
+      ...timeline.map(
+        (item, index) =>
+          `${vttTime(item.start)} --> ${vttTime(item.speech_end)}\n${activeSentences[index]?.german ?? ''}`,
+      ),
+    ].join('\n\n');
+  }, [activeSentences, timeline]);
+  const captionSource = `data:text/vtt;charset=utf-8,${encodeURIComponent(captions || 'WEBVTT')}`;
   const current = timeline.find(
     (item) => position >= item.start && position < item.end,
   );
@@ -497,7 +489,7 @@ export default function Home() {
               >
                 <track
                   kind="captions"
-                  src="/audio/practice.de.vtt"
+                  src={captionSource}
                   srcLang="de"
                   label="Niemiecki"
                 />
@@ -596,12 +588,31 @@ export default function Home() {
                           <Check />
                           Audio zgodne z zestawem
                         </>
+                      ) : selected.practice_set.audio?.status === 'pending' ||
+                        preparingAudio ? (
+                        <>Przygotowuję aktualne audio…</>
+                      ) : selected.practice_set.audio?.status === 'failed' ? (
+                        <>
+                          Poprzednie przygotowanie nie powiodło się{' '}
+                          <Button
+                            variant="outline"
+                            onClick={() => void prepareAudio()}
+                            disabled={
+                              preparingAudio || !selected.sentences.length
+                            }
+                          >
+                            Spróbuj ponownie
+                          </Button>
+                        </>
                       ) : (
                         <>
                           Audio nieaktualne lub jeszcze nieprzygotowane{' '}
                           <Button
                             variant="outline"
                             onClick={() => void prepareAudio()}
+                            disabled={
+                              preparingAudio || !selected.sentences.length
+                            }
                           >
                             Przygotuj audio
                           </Button>

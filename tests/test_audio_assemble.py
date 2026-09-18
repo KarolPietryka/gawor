@@ -24,18 +24,18 @@ class AudioAssemblyTests(unittest.TestCase):
                           self.root, self.root / "set.wav", repeats=2)
         with wave.open(str(self.root / "set.wav"), "rb") as reader:
             actual = reader.readframes(reader.getnframes())
-        cycle = b"\x90" * 100 + b"\x80" * 250 + b"\xa0" * 200 + b"\x80" * 400
+        cycle = b"\x90" * 100 + b"\x80" * 150 + b"\xa0" * 200 + b"\x80" * 300
         self.assertEqual(actual, cycle * 2)
-        self.assertEqual(result["duration"], 19)
-        self.assertEqual(result["timeline"][2]["start"], 9.5)
-        self.assertEqual(result["timeline"][-1]["end"], 19)
+        self.assertEqual(result["duration"], 15)
+        self.assertEqual(result["timeline"][2]["start"], 7.5)
+        self.assertEqual(result["timeline"][-1]["end"], 15)
 
     def test_sixteen_bit_silence_is_zero(self):
         self.clip("01", b"\x01\x02" * 100, width=2)
         assemble([{"id":"01", "de":"Eins."}], self.root, self.root / "set.wav")
         with wave.open(str(self.root / "set.wav"), "rb") as reader:
             reader.setpos(100)
-            self.assertEqual(reader.readframes(250), b"\x00" * 500)
+            self.assertEqual(reader.readframes(150), b"\x00" * 300)
 
     def test_rejects_different_sample_rates_without_output(self):
         self.clip("01", b"\x90" * 100)

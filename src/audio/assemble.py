@@ -12,7 +12,7 @@ import tempfile
 import wave
 
 
-def assemble(sentences, clip_dir, output, *, pause_factor=1.5, pause_extra=1.0, repeats=1):
+def assemble(sentences, clip_dir, output, *, pause_factor=1.5, pause_extra=0.0, repeats=1):
     if not sentences:
         raise ValueError("A practice set must contain at least one sentence")
     if not math.isfinite(pause_factor) or not math.isfinite(pause_extra) or pause_factor < 0 or pause_extra < 0:
@@ -86,7 +86,7 @@ def main():
     parser.add_argument("output", type=Path)
     parser.add_argument("--repeats", type=int, default=1)
     parser.add_argument("--pause-factor", type=float, default=1.5)
-    parser.add_argument("--pause-extra", type=float, default=1.0)
+    parser.add_argument("--pause-extra", type=float, default=0.0)
     args = parser.parse_args()
     result = assemble(json.loads(args.sentences.read_text(encoding="utf-8-sig")), args.clip_dir,
                       args.output, pause_factor=args.pause_factor, pause_extra=args.pause_extra,
