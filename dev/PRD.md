@@ -1,6 +1,10 @@
 # PRD — Gawor
 
-Wersja 0.1 · 2026-09-12 · Właściciel produktu / interesariusz: Karol
+Wersja 0.2 · aktualizacja 2026-09-16 · Właściciel produktu / interesariusz: Karol
+
+Aktualny przyrost: [sprint 004 — powtarzanie własnych zdań](sprint-004/PRD.md). Karol potwierdził priorytet generowania audio własnych zestawów przed automatycznym przesyłaniem zdań z rozmowy. Implementacja techniczna jest opisana w [wyniku sprintu](sprint-004/RESULT.md); demonstracja i test iPhone'a czekają na review.
+
+Kolejny planowany przyrost: [draft sprintu 005 — cykliczny eksport bazy](sprint-005/PRD.md). Karol chce kopii danych niezależnych od Sites; harmonogram, miejsce przechowywania i retencja pozostają do ustalenia.
 
 ## Problem
 
@@ -39,7 +43,7 @@ Pierwszy użytkownik: Karol. Interfejs po polsku, rozmowa i wzorce wymowy po nie
 
 - Jeden Start uruchamia wszystkie zdania po kolei; bez ręcznego przechodzenia i bez ręcznego uruchamiania pauz.
 - Po każdym zdaniu, także ostatnim, automatyczny czas na powtórzenie.
-- Czas ciszy zależy od długości wypowiedzi; początkowa hipoteza: 1,5 × długość mowy + 1 sekunda. Wartość do oceny przez Karola.
+- Czas ciszy po każdym zdaniu wynosi 1,5 × rzeczywisty czas czytania tego zdania przez głos, bez dodatkowej sekundy. Decyzja Karola z 2026-09-16 zastępuje wcześniejszą hipotezę „1,5 × długość mowy + 1 sekunda”.
 - Zestaw wraca do początku aż do zatrzymania. Sterowanie Start / Pauza / wznowienie.
 - Odtwarzanie ma działać przy zablokowanym ekranie. Utrata sieci, wywołanie telefonu i wznowienie muszą być sprawdzone w testach urządzenia; nie obiecujemy działania offline w MVP.
 - Architektura do walidacji: gotowy plik audio zawierający mowę i ciszę, odtwarzany standardowym elementem audio. Kod strony nie odmierza ciszy między zdaniami.

@@ -1,4 +1,5 @@
 import { getDatabase } from '@/db';
+import { audioContentDigest, parseManifest } from '@/lib/audio';
 
 export type SessionSentence = {
   id: string;
@@ -36,6 +37,8 @@ type AudioRow = {
   voice: string;
   pause_multiplier_milli: number;
   duration_ms: number | null;
+  object_key: string | null;
+  manifest_json: string | null;
   updated_at: string;
 };
 
@@ -55,12 +58,6 @@ export async function digest(value: string) {
   return Array.from(new Uint8Array(hash), (byte) =>
     byte.toString(16).padStart(2, '0'),
   ).join('');
-}
-
-export async function contentDigest(sentences: string[]) {
-  return digest(
-    sentences.map((sentence) => normalizeGerman(sentence)).join('\n'),
-  );
 }
 
 export async function listSessions() {
@@ -84,7 +81,8 @@ export async function listSessions() {
         .all<VocabularyRow>(),
       db
         .prepare(`SELECT id, practice_set_id, content_hash, status, file_url, voice,
-      pause_multiplier_milli, duration_ms, updated_at FROM audio_assets ORDER BY updated_at DESC`)
+      pause_multiplier_milli, duration_ms, object_key, manifest_json, updated_at
+      FROM audio_assets ORDER BY updated_at DESC`)
         .all<AudioRow>(),
     ]);
 
@@ -99,7 +97,7 @@ export async function listSessions() {
         (item) => item.session_id === session.id,
       );
       const audio = audioBySet.get(session.practice_set_id) ?? null;
-      const currentHash = await contentDigest(
+      const currentHash = await audioContentDigest(
         sentences.map((item) => item.german),
       );
       return {
@@ -116,9 +114,12 @@ export async function listSessions() {
           audio: audio
             ? {
                 ...audio,
+                manifest: parseManifest(audio.manifest_json),
                 is_current:
                   audio.status === 'ready' &&
-                  audio.content_hash === currentHash,
+                  audio.content_hash === currentHash &&
+                  Boolean(audio.object_key) &&
+                  Boolean(parseManifest(audio.manifest_json)),
               }
             : null,
         },
@@ -138,7 +139,7 @@ export function markSetChanged(
       .bind(now, practiceSetId),
     db
       .prepare(
-        "UPDATE audio_assets SET status = 'stale', updated_at = ? WHERE practice_set_id = ? AND status = 'ready'",
+        "UPDATE audio_assets SET status = 'stale', updated_at = ? WHERE practice_set_id = ? AND status IN ('ready', 'pending')",
       )
       .bind(now, practiceSetId),
   ];

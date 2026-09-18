@@ -1,8 +1,6 @@
-import fixtureSentences from '@/app/sentences.json';
 import { getDatabase } from '@/db';
 import {
   cleanText,
-  contentDigest,
   digest,
   errorResponse,
   listSessions,
@@ -133,22 +131,6 @@ export async function POST(request: Request) {
           'INSERT INTO vocabulary (id, session_id, german, polish) VALUES (?, ?, ?, ?)',
         )
         .bind(crypto.randomUUID(), sessionId, german, polish),
-    );
-  }
-
-  const importedHash = await contentDigest(
-    sentences.map((item) => item.german),
-  );
-  const fixtureHash = await contentDigest(
-    fixtureSentences.map((item) => item.de),
-  );
-  if (importedHash === fixtureHash) {
-    statements.push(
-      db
-        .prepare(`INSERT INTO audio_assets
-      (id, practice_set_id, content_hash, status, file_url, voice, pause_multiplier_milli, duration_ms, created_at, updated_at)
-      VALUES (?, ?, ?, 'ready', '/audio/practice.mp3', 'de-DE-KatjaNeural', 1500, 71928, ?, ?)`)
-        .bind(crypto.randomUUID(), practiceSetId, importedHash, now, now),
     );
   }
 

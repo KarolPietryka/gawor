@@ -89,6 +89,8 @@ export const audioAssets = sqliteTable(
     voice: text('voice').notNull().default('de-DE-KatjaNeural'),
     pauseMultiplier: integer('pause_multiplier_milli').notNull().default(1500),
     durationMs: integer('duration_ms'),
+    objectKey: text('object_key'),
+    manifestJson: text('manifest_json'),
     createdAt: text('created_at').notNull(),
     updatedAt: text('updated_at').notNull(),
   },
@@ -96,6 +98,10 @@ export const audioAssets = sqliteTable(
     index('idx_audio_assets_practice_set').on(
       table.practiceSetId,
       table.updatedAt,
+    ),
+    uniqueIndex('idx_audio_assets_set_content').on(
+      table.practiceSetId,
+      table.contentHash,
     ),
   ],
 );
