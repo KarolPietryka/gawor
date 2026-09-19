@@ -8,6 +8,10 @@
 | 004 — technicznie zaimplementowany, do review | Audio własnych zestawów, cisza 1,5 × czas mowy bez dodatkowej sekundy, ponowne generowanie po edycji, odtwarzanie i test iPhone'a | Własny zestaw działa od przygotowania nagrania do powtarzania; trwałość, aktualność audio i test urządzenia zweryfikowane |
 | 005 — draft | Cykliczny eksport bazy do miejsca niezależnego od Sites | Automatyczne kopie dostępne poza Sites i sprawdzone odtworzenie biblioteki; szczegóły do uzgodnienia |
 
+## Otwarte funkcje
+
+- Usuwanie całych zestawów z biblioteki wraz z powiązanymi zdaniami, metadanymi audio i plikiem w R2.
+
 [PRD sprintu 004 i przekazanie dla nowego agenta](sprint-004/PRD.md). Decyzja Karola z 2026-09-16: powtarzanie własnych zdań ma pierwszeństwo przed automatyzacją zapisu rozmów. Sprint 004 przejął brakujące generowanie audio ze sprintu 003; [wynik techniczny](sprint-004/RESULT.md) jest gotowy, a [review](sprint-004/REVIEW.md) czeka na demonstrację i test urządzenia. Dopasowanie rozmówcy i szersze dopracowanie PWA odłożono, bez przypisania numeru sprintu.
 
 Na każdym review można zmienić kolejność i zakres. Sprint to spójny przyrost, nie deklaracja liczby dni.
