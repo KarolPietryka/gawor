@@ -1,6 +1,6 @@
 # Hotfix 4.1 — odtwarzanie audio na telefonie
 
-Data: 2026-09-20. Status: gotowy do lokalnego testu Karola na iPhonie.
+Data: 2026-09-20. Status: wdrożony na produkcję; oczekuje na test Karola na iPhonie.
 
 ## Problem
 
@@ -38,6 +38,9 @@ synteza TTS, R2 ani dane użytkownika.
   tych plików.
 - Serwer deweloperski nasłuchuje na `0.0.0.0:3000`; test HTTP z komputera przez
   `127.0.0.1` i adres Wi-Fi zwrócił `200`.
+- Wdrożenie produkcyjne: Worker `gawor`, wersja `04066b6a-faf5-4bbe-bc55-7201c554a193`,
+  2026-09-20. Wdrożenie używa istniejących bindingów D1 `gawor` i R2
+  `gawor-audio`.
 
 Do ręcznego wykonania przez Karola:
 
@@ -47,5 +50,5 @@ Do ręcznego wykonania przez Karola:
 2. Potwierdzić przynajmniej dwa pełne obiegi, pauzę/wznowienie i później
    wykonać nadal otwarty, 15-minutowy test z zablokowanym ekranem.
 
-Hotfix nie jest akceptacją testu urządzenia ani zgodą na commit, push lub
-wdrożenie. Te kroki wymagają wyraźnego potwierdzenia Karola po teście.
+Hotfix nie jest akceptacją testu urządzenia. Wynik testu iPhone'a pozostaje
+warunkiem zamknięcia Sprintu 4.
