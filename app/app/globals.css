@@ -74,6 +74,9 @@ h3 { margin: 0; font-size: 17px; }
 .cue { margin-bottom: 24px; color: #d2fa69; }
 .play-button { width: 100%; min-height: 58px; border-radius: 14px; gap: 12px; white-space: normal; font-size: 18px; }
 .status { display: block; margin: 16px 0 0; color: #c4d3c9; font-size: 14px; }
+.audio-engine { position: absolute; width: 1px; height: 1px; overflow: hidden; opacity: 0; pointer-events: none; }
+.spin { animation: audio-spin 1s linear infinite; }
+@keyframes audio-spin { to { transform: rotate(360deg); } }
 .sentence-list { margin-top: 38px; }
 .section-heading { display: flex; align-items: center; justify-content: space-between; gap: 18px; }
 .section-heading p { margin: 5px 0 0; color: var(--muted-foreground); }
@@ -81,6 +84,7 @@ h3 { margin: 0; font-size: 17px; }
 ol { list-style: none; padding: 0; margin: 16px 0; }
 ol li { display: flex; gap: 18px; padding: 18px 10px; border-bottom: 1px solid var(--border); border-radius: 6px; }
 ol li.active { background: #e3eccf; }
+.practice-sentence-copy { flex: 1; }
 .number { flex: 0 0 auto; padding-top: 2px; color: #5d6f65; font-size: 14px; font-variant-numeric: tabular-nums; }
 .library-layout { display: grid; grid-template-columns: minmax(210px, .8fr) minmax(0, 2fr); gap: 24px; align-items: start; }
 .session-list { display: grid; gap: 8px; }

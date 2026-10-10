@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -28,6 +28,7 @@ import {
   Check,
   Headphones,
   Library,
+  LoaderCircle,
   Pause,
   Pencil,
   Play,
@@ -35,6 +36,7 @@ import {
   Repeat2,
   Trash2,
   Upload,
+  Volume2,
 } from 'lucide-react';
 import type { AudioManifest } from '@/lib/audio';
 type Sentence = {
@@ -58,6 +60,13 @@ type PracticeSession = {
   practice_set: { id: string; title: string; audio: AudioAsset | null };
 };
 type SentenceDraft = { german: string; polish: string; note: string };
+type PlaybackMode = 'loop' | 'sentence' | null;
+type LoopResume = { position: number; wasPlaying: boolean };
+type AudioCache = {
+  fileUrl: string;
+  objectUrl: string | null;
+  promise: Promise<string>;
+};
 
 const emptyDraft: SentenceDraft = { german: '', polish: '', note: '' };
 
@@ -92,13 +101,26 @@ async function api<T = Record<string, unknown>>(
 
 export default function Home() {
   const audio = useRef<HTMLAudioElement>(null);
+  const audioCache = useRef<AudioCache | null>(null);
+  const loadedObjectUrl = useRef<string | null>(null);
+  const playbackMode = useRef<PlaybackMode>(null);
+  const loopResume = useRef<LoopResume | null>(null);
+  const loopShouldResume = useRef(false);
+  const sentenceEnd = useRef<number | null>(null);
+  const commandId = useRef(0);
+  const startLoopRef = useRef<(() => void) | null>(null);
+  const currentAudioUrl = useRef<string | null>(null);
   const [sessions, setSessions] = useState<PracticeSession[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [view, setView] = useState<'practice' | 'library' | 'import'>(
     'practice',
   );
   const [playing, setPlaying] = useState(false);
+  const [playback, setPlayback] = useState<PlaybackMode>(null);
   const [waiting, setWaiting] = useState(false);
+  const [loadingAudio, setLoadingAudio] = useState(false);
+  const [cacheLoadingUrl, setCacheLoadingUrl] = useState<string | null>(null);
+  const [previewSentence, setPreviewSentence] = useState<number | null>(null);
   const [preparingAudio, setPreparingAudio] = useState(false);
   const [position, setPosition] = useState(0);
   const [message, setMessage] = useState('Wybierz zestaw z biblioteki.');
@@ -118,7 +140,22 @@ export default function Home() {
       ? selected.practice_set.audio.file_url
       : null
     : null;
+  currentAudioUrl.current = activeAudioUrl;
   const activeTitle = selected?.practice_set.title ?? 'Wybierz zestaw';
+  const audioLoading =
+    loadingAudio || Boolean(activeAudioUrl && cacheLoadingUrl === activeAudioUrl);
+  const timeline = useMemo(
+    () =>
+      selected?.practice_set.audio?.is_current &&
+      selected.practice_set.audio.manifest?.timeline.length ===
+        activeSentences.length
+        ? selected.practice_set.audio.manifest.timeline
+        : [],
+    [activeSentences.length, selected],
+  );
+  const audioReady = Boolean(
+    activeAudioUrl && timeline.length === activeSentences.length,
+  );
 
   async function loadSessions(preferId?: string) {
     try {
@@ -139,17 +176,44 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    queueMicrotask(() => {
-      audio.current?.pause();
-      setPosition(0);
-      setPlaying(false);
-      if (selectedId && !activeAudioUrl)
-        setMessage('Ten zestaw wymaga przygotowania aktualnego audio.');
-      else if (activeAudioUrl)
-        setMessage('Gotowe. Słuchaj i powtarzaj w przerwach.');
-      audio.current?.load();
-    });
+    commandId.current += 1;
+    audio.current?.pause();
+    playbackMode.current = null;
+    loopResume.current = null;
+    loopShouldResume.current = false;
+    sentenceEnd.current = null;
+    setPlayback(null);
+    setPreviewSentence(null);
+    setPosition(0);
+    setPlaying(false);
+    setWaiting(false);
+    setLoadingAudio(false);
+    if (audioCache.current?.fileUrl !== activeAudioUrl) {
+      const oldObjectUrl = audioCache.current?.objectUrl;
+      if (audio.current) {
+        audio.current.removeAttribute('src');
+        audio.current.load();
+      }
+      loadedObjectUrl.current = null;
+      audioCache.current = null;
+      if (oldObjectUrl) URL.revokeObjectURL(oldObjectUrl);
+    }
+    if (selectedId && !activeAudioUrl)
+      setMessage('Ten zestaw wymaga przygotowania aktualnego audio.');
+    else if (activeAudioUrl)
+      setMessage('Gotowe. Słuchaj i powtarzaj w przerwach.');
   }, [selectedId, activeAudioUrl]);
+
+  useEffect(
+    () => () => {
+      audio.current?.pause();
+      if (audioCache.current?.objectUrl)
+        URL.revokeObjectURL(audioCache.current.objectUrl);
+      audioCache.current = null;
+      loadedObjectUrl.current = null;
+    },
+    [],
+  );
 
   useEffect(() => {
     if (!('mediaSession' in navigator)) return;
@@ -158,13 +222,14 @@ export default function Home() {
       artist: 'Gawor · niemiecki',
     });
     navigator.mediaSession.setActionHandler('play', () => {
-      void audio.current
-        ?.play()
-        .catch(() => setMessage('Otwórz aplikację i naciśnij Start.'));
+      startLoopRef.current?.();
     });
-    navigator.mediaSession.setActionHandler('pause', () =>
-      audio.current?.pause(),
-    );
+    navigator.mediaSession.setActionHandler('pause', () => {
+      if (playbackMode.current === 'loop') {
+        loopShouldResume.current = false;
+        audio.current?.pause();
+      }
+    });
     return () => {
       navigator.mediaSession.setActionHandler('play', null);
       navigator.mediaSession.setActionHandler('pause', null);
@@ -223,17 +288,241 @@ export default function Home() {
     return () => lifecycle.abort();
   }, [activeAudioUrl, activeSentences.length, activeTitle]);
 
-  async function toggle() {
-    if (!audio.current || !activeAudioUrl) return;
-    if (!audio.current.paused) {
-      audio.current.pause();
+  const setMode = useCallback((mode: PlaybackMode) => {
+    playbackMode.current = mode;
+    setPlayback(mode);
+  }, []);
+
+  const ensureAudioLoaded = useCallback(async (fileUrl: string) => {
+    const player = audio.current;
+    if (!player) throw new Error('Odtwarzacz audio jest niedostępny.');
+
+    let cached = audioCache.current;
+    if (!cached || cached.fileUrl !== fileUrl) {
+      player.pause();
+      player.removeAttribute('src');
+      player.load();
+      loadedObjectUrl.current = null;
+      if (cached?.objectUrl) URL.revokeObjectURL(cached.objectUrl);
+
+      const record: AudioCache = {
+        fileUrl,
+        objectUrl: null,
+        promise: Promise.resolve(''),
+      };
+      record.promise = fetch(fileUrl, { cache: 'no-store' })
+        .then(async (response) => {
+          if (!response.ok)
+            throw new Error('Nie udało się pobrać aktualnego audio.');
+          return URL.createObjectURL(await response.blob());
+        })
+        .then((objectUrl) => {
+          if (audioCache.current !== record) {
+            URL.revokeObjectURL(objectUrl);
+            throw new Error('Zmieniono wybrany zestaw. Spróbuj ponownie.');
+          }
+          record.objectUrl = objectUrl;
+          return objectUrl;
+        })
+        .catch((error: unknown) => {
+          if (audioCache.current === record) audioCache.current = null;
+          throw error;
+        });
+      audioCache.current = record;
+      cached = record;
+    }
+
+    const objectUrl = await cached.promise;
+    if (audioCache.current !== cached || currentAudioUrl.current !== fileUrl)
+      throw new Error('Zmieniono wybrany zestaw. Spróbuj ponownie.');
+
+    if (loadedObjectUrl.current !== objectUrl) {
+      const metadataReady = new Promise<void>((resolve, reject) => {
+        const onReady = () => {
+          cleanup();
+          resolve();
+        };
+        const onError = () => {
+          cleanup();
+          reject(new Error('Nie udało się otworzyć nagrania.'));
+        };
+        const cleanup = () => {
+          player.removeEventListener('loadedmetadata', onReady);
+          player.removeEventListener('error', onError);
+        };
+        player.addEventListener('loadedmetadata', onReady, { once: true });
+        player.addEventListener('error', onError, { once: true });
+      });
+      player.src = objectUrl;
+      player.load();
+      try {
+        await metadataReady;
+      } catch (error) {
+        if (audioCache.current === cached) {
+          audioCache.current = null;
+          URL.revokeObjectURL(objectUrl);
+        }
+        throw error;
+      }
+      loadedObjectUrl.current = objectUrl;
+    }
+    return player;
+  }, []);
+
+  useEffect(() => {
+    if (!activeAudioUrl || !audioReady) {
+      setCacheLoadingUrl(null);
       return;
     }
+    let cancelled = false;
+    setCacheLoadingUrl(activeAudioUrl);
+    void ensureAudioLoaded(activeAudioUrl)
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled && currentAudioUrl.current === activeAudioUrl)
+          setCacheLoadingUrl(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [activeAudioUrl, audioReady, ensureAudioLoaded]);
+
+  const startLoop = useCallback(async () => {
+    if (!activeAudioUrl || !audioReady) return;
+    const command = ++commandId.current;
+    loopResume.current = null;
+    sentenceEnd.current = null;
+    loopShouldResume.current = true;
+    setPreviewSentence(null);
+    setMode('loop');
+    setLoadingAudio(true);
     try {
-      await audio.current.play();
-    } catch {
-      setMessage('Nie udało się odtworzyć nagrania. Spróbuj ponownie.');
+      const player = await ensureAudioLoaded(activeAudioUrl);
+      if (command !== commandId.current) return;
+      player.pause();
+      player.loop = true;
+      player.currentTime = 0;
+      setPosition(0);
+      await player.play();
+    } catch (error) {
+      if (command === commandId.current) {
+        setMode(null);
+        loopShouldResume.current = false;
+        setMessage(
+          error instanceof Error
+            ? error.message
+            : 'Nie udało się odtworzyć nagrania. Spróbuj ponownie.',
+        );
+      }
+    } finally {
+      if (command === commandId.current) setLoadingAudio(false);
     }
+  }, [activeAudioUrl, audioReady, ensureAudioLoaded, setMode]);
+  startLoopRef.current = () => void startLoop();
+
+  async function playSentence(sentenceNumber: number) {
+    const item = timeline[sentenceNumber];
+    if (!activeAudioUrl || !audioReady || !item) return;
+    const player = audio.current;
+    const mode = playbackMode.current;
+    if (mode === 'loop' && !loopResume.current) {
+      loopResume.current = {
+        position: player?.currentTime ?? position,
+        wasPlaying: loopShouldResume.current,
+      };
+    }
+    const command = ++commandId.current;
+    sentenceEnd.current = item.speech_end;
+    setPreviewSentence(sentenceNumber);
+    setMode('sentence');
+    setLoadingAudio(true);
+    try {
+      const currentPlayer = await ensureAudioLoaded(activeAudioUrl);
+      if (command !== commandId.current) return;
+      currentPlayer.pause();
+      currentPlayer.loop = false;
+      currentPlayer.currentTime = item.start;
+      setPosition(item.start);
+      await currentPlayer.play();
+      setMessage(`Odsłuch zdania ${sentenceNumber + 1} z ${activeSentences.length}.`);
+    } catch (error) {
+      if (command === commandId.current) {
+        setMode(null);
+        setPreviewSentence(null);
+        sentenceEnd.current = null;
+        loopResume.current = null;
+        loopShouldResume.current = false;
+        setMessage(
+          error instanceof Error
+            ? error.message
+            : 'Nie udało się odtworzyć zdania.',
+        );
+      }
+    } finally {
+      if (command === commandId.current) setLoadingAudio(false);
+    }
+  }
+
+  function finishSentence() {
+    if (playbackMode.current !== 'sentence') return;
+    const player = audio.current;
+    if (!player) return;
+    commandId.current += 1;
+    const resume = loopResume.current;
+    player.pause();
+    sentenceEnd.current = null;
+    setPreviewSentence(null);
+    loopResume.current = null;
+    if (resume) {
+      player.loop = true;
+      setMode('loop');
+      loopShouldResume.current = resume.wasPlaying;
+      player.currentTime = resume.position;
+      setPosition(resume.position);
+      if (resume.wasPlaying) {
+        void player.play().catch(() => {
+          setMode(null);
+          loopShouldResume.current = false;
+          setMessage('Nie udało się wznowić pętli. Naciśnij Start.');
+        });
+      }
+      return;
+    }
+    player.loop = false;
+    setMode(null);
+    loopShouldResume.current = false;
+    setMessage('Odsłuch zdania zakończony.');
+  }
+
+  function updatePosition(value: number) {
+    setPosition(value);
+    const end = sentenceEnd.current;
+    if (playbackMode.current === 'sentence' && end !== null && value >= end)
+      finishSentence();
+  }
+
+  async function toggle() {
+    const player = audio.current;
+    if (playbackMode.current === 'loop') {
+      if (player && !player.paused) {
+        loopShouldResume.current = false;
+        player.pause();
+      } else if (loadingAudio) {
+        commandId.current += 1;
+        setLoadingAudio(false);
+        loopShouldResume.current = false;
+        setMode(null);
+      } else if (player && activeAudioUrl) {
+        loopShouldResume.current = true;
+        try {
+          await player.play();
+        } catch {
+          setMessage('Nie udało się wznowić nagrania. Spróbuj ponownie.');
+        }
+      }
+      return;
+    }
+    await startLoop();
   }
 
   async function importSession() {
@@ -340,15 +629,6 @@ export default function Home() {
     }
   }
 
-  const timeline = useMemo(
-    () =>
-      selected?.practice_set.audio?.is_current &&
-      selected.practice_set.audio.manifest?.timeline.length ===
-        activeSentences.length
-        ? selected.practice_set.audio.manifest.timeline
-        : [],
-    [activeSentences.length, selected],
-  );
   const captions = useMemo(() => {
     if (timeline.length !== activeSentences.length) return '';
     return [
@@ -449,52 +729,24 @@ export default function Home() {
             <Button
               className="play-button"
               onClick={toggle}
-              disabled={!activeAudioUrl || !activeSentences.length}
+              disabled={!audioReady || audioLoading && playback === 'loop'}
             >
-              {playing ? <Pause /> : <Play />}
-              {playing
+              {audioLoading && playback === 'loop' ? (
+                <LoaderCircle className="spin" />
+              ) : playback === 'loop' && playing ? (
+                <Pause />
+              ) : (
+                <Play />
+              )}
+              {audioLoading && playback === 'loop'
+                ? 'Wczytuję audio…'
+                : playback === 'loop' && playing
                 ? 'Pauza'
-                : position > 0
+                : playback === 'loop' && position > 0
                   ? 'Wznów ćwiczenie'
                   : 'Zacznij powtarzać'}
             </Button>
             <output className="status">{message}</output>
-            {activeAudioUrl && (
-              <audio
-                ref={audio}
-                src={activeAudioUrl}
-                preload="metadata"
-                loop
-                onTimeUpdate={(event) =>
-                  setPosition(event.currentTarget.currentTime)
-                }
-                onPlay={() => {
-                  setPlaying(true);
-                  setMessage('Przerwy na powtórzenie są częścią nagrania.');
-                  if ('mediaSession' in navigator)
-                    navigator.mediaSession.playbackState = 'playing';
-                }}
-                onPause={() => {
-                  setPlaying(false);
-                  if ('mediaSession' in navigator)
-                    navigator.mediaSession.playbackState = 'paused';
-                }}
-                onWaiting={() => setWaiting(true)}
-                onPlaying={() => setWaiting(false)}
-                onError={() => {
-                  setPlaying(false);
-                  setWaiting(false);
-                  setMessage('Nie udało się wczytać audio.');
-                }}
-              >
-                <track
-                  kind="captions"
-                  src={captionSource}
-                  srcLang="de"
-                  label="Niemiecki"
-                />
-              </audio>
-            )}
           </div>
           <section
             className="sentence-list"
@@ -509,12 +761,35 @@ export default function Home() {
                 {activeSentences.map((item, number) => (
                   <li
                     key={item.id}
-                    className={playing && number === index ? 'active' : ''}
+                    className={
+                      previewSentence === number && playing ||
+                      playback === 'loop' && playing && number === index
+                        ? 'active'
+                        : ''
+                    }
                   >
                     <span className="number">
                       {String(number + 1).padStart(2, '0')}
                     </span>
-                    <span lang="de">{item.german}</span>
+                    <span className="practice-sentence-copy" lang="de">
+                      {item.german}
+                    </span>
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      aria-label={`Odtwórz zdanie ${number + 1}`}
+                      title="Odtwórz tylko to zdanie"
+                      disabled={!audioReady || audioLoading}
+                      onClick={() => void playSentence(number)}
+                    >
+                      {audioLoading ? (
+                        <LoaderCircle className="spin" />
+                      ) : previewSentence === number && playing ? (
+                        <Volume2 />
+                      ) : (
+                        <Play />
+                      )}
+                    </Button>
                   </li>
                 ))}
               </ol>
@@ -621,7 +896,12 @@ export default function Home() {
                     </div>
                     <ol className="editable-list">
                       {selected.sentences.map((item, number) => (
-                        <li key={item.id}>
+                        <li
+                          key={item.id}
+                          className={
+                            previewSentence === number && playing ? 'active' : ''
+                          }
+                        >
                           <span className="number">
                             {String(number + 1).padStart(2, '0')}
                           </span>
@@ -630,6 +910,22 @@ export default function Home() {
                             {item.polish && <small>{item.polish}</small>}
                           </span>
                           <span className="row-actions">
+                            <Button
+                              variant="ghost"
+                              size="icon-sm"
+                              aria-label={`Odtwórz zdanie ${number + 1}`}
+                              title="Odtwórz tylko to zdanie"
+                              disabled={!audioReady || audioLoading}
+                              onClick={() => void playSentence(number)}
+                            >
+                              {audioLoading ? (
+                                <LoaderCircle className="spin" />
+                              ) : previewSentence === number && playing ? (
+                                <Volume2 />
+                              ) : (
+                                <Play />
+                              )}
+                            </Button>
                             <Button
                               variant="ghost"
                               size="icon"
@@ -735,6 +1031,55 @@ export default function Home() {
           </div>
         </section>
       )}
+
+      <audio
+        ref={audio}
+        className="audio-engine"
+        preload="none"
+        loop={playback === 'loop'}
+        onTimeUpdate={(event) =>
+          updatePosition(event.currentTarget.currentTime)
+        }
+        onPlay={() => {
+          setPlaying(true);
+          if (playbackMode.current === 'loop')
+            setMessage('Przerwy na powtórzenie są częścią nagrania.');
+          if ('mediaSession' in navigator)
+            navigator.mediaSession.playbackState = 'playing';
+        }}
+        onPause={() => {
+          setPlaying(false);
+          if ('mediaSession' in navigator)
+            navigator.mediaSession.playbackState = 'paused';
+        }}
+        onWaiting={() => setWaiting(true)}
+        onPlaying={() => setWaiting(false)}
+        onError={() => {
+          setPlaying(false);
+          setWaiting(false);
+          setLoadingAudio(false);
+          if (audioCache.current?.objectUrl)
+            URL.revokeObjectURL(audioCache.current.objectUrl);
+          audioCache.current = null;
+          loadedObjectUrl.current = null;
+          setMode(null);
+          setPreviewSentence(null);
+          sentenceEnd.current = null;
+          loopResume.current = null;
+          loopShouldResume.current = false;
+          setMessage('Nie udało się wczytać audio.');
+        }}
+        onEnded={() => {
+          if (playbackMode.current === 'sentence') finishSentence();
+        }}
+      >
+        <track
+          kind="captions"
+          src={captionSource}
+          srcLang="de"
+          label="Niemiecki"
+        />
+      </audio>
 
       <Dialog
         open={Boolean(editing)}

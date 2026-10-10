@@ -2,7 +2,7 @@
 
 Data: 2026-09-16. Właściciel produktu: Karol.
 
-Status początkowy: zakres uzgodniony i przekazany do implementacji. Wynik techniczny jest zapisany w [RESULT.md](RESULT.md), a [REVIEW.md](REVIEW.md) pozostaje otwarty do demonstracji i testu urządzenia.
+Status początkowy: zakres uzgodniony i przekazany do implementacji. Status końcowy: sprint zamknięty decyzją Karola z 2026-10-10; demonstracja i test urządzenia pozostają niewykonane według dostępnych zapisów. Wynik techniczny jest zapisany w [RESULT.md](RESULT.md), a szczegóły weryfikacji w [REVIEW.md](REVIEW.md).
 
 ## Decyzje Karola
 

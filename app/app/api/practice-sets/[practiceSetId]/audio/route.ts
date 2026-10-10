@@ -1,8 +1,15 @@
-import { getAudioBucket, getDatabase, getOpenAiApiKey } from '@/db';
+import {
+  AudioConfigurationError,
+  getAudioBucket,
+  getDatabase,
+  getOpenAiApiKey,
+} from '@/db';
 import { assemblePcm, AUDIO_PROFILE, audioContentDigest } from '@/lib/audio';
 import { errorResponse } from '@/lib/sessions';
 
 type SentenceRow = { german: string };
+class AudioProviderError extends Error {}
+
 type AudioRow = {
   id: string;
   status: 'ready' | 'stale' | 'pending' | 'failed';
@@ -37,7 +44,15 @@ async function synthesize(text: string, apiKey: string) {
   });
   if (!response.ok) {
     console.error('TTS request failed', response.status);
-    throw new Error('Usługa syntezy nie przygotowała nagrania.');
+    const message =
+      response.status === 401
+        ? 'OpenAI odrzuciło klucz API (401). Sprawdź, czy app/.dev.vars zawiera aktualny klucz API OpenAI.'
+        : response.status === 403
+          ? 'Klucz OpenAI nie ma dostępu do syntezy audio (403). Sprawdź uprawnienia projektu API.'
+          : response.status === 429
+            ? 'OpenAI odrzuciło żądanie z powodu limitu lub rozliczeń (429). Sprawdź limity API.'
+            : 'OpenAI nie przygotowało nagrania. Spróbuj ponownie.';
+    throw new AudioProviderError(message);
   }
   return new Uint8Array(await response.arrayBuffer());
 }
@@ -82,6 +97,11 @@ export async function POST(
         { status: 202 },
       );
 
+    // Fail before creating a pending row when local OpenAI or R2 configuration
+    // is missing, so the UI can explain how to fix the setup.
+    const apiKey = getOpenAiApiKey();
+    const bucket = getAudioBucket();
+
     const now = new Date().toISOString();
     const assetId = existing?.id ?? crypto.randomUUID();
     pendingAssetId = assetId;
@@ -111,8 +131,6 @@ export async function POST(
         .run();
     }
 
-    const apiKey = getOpenAiApiKey();
-    const bucket = getAudioBucket();
     const clips = await Promise.all(
       sentences.map((sentence) => synthesize(sentence, apiKey)),
     );
@@ -189,6 +207,10 @@ export async function POST(
     } catch {
       // Preserve the original synthesis failure.
     }
+    if (error instanceof AudioConfigurationError)
+      return Response.json({ error: error.message }, { status: 503 });
+    if (error instanceof AudioProviderError)
+      return Response.json({ error: error.message }, { status: 502 });
     return Response.json(
       { error: 'Nie udało się przygotować audio. Spróbuj ponownie.' },
       { status: 502 },
