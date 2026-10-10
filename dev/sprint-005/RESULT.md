@@ -1,6 +1,6 @@
 # Sprint 005 — wynik implementacji
 
-Status: zaimplementowano odsłuch pojedynczych zdań w widoku ćwiczenia i bibliotece. Weryfikacji funkcjonalnej nie uruchamiano.
+Status: sprint zamknięty 2026-10-10. Karol potwierdził: „dziala sprint skonczony”.
 
 ## Zmiany
 
@@ -11,5 +11,6 @@ Status: zaimplementowano odsłuch pojedynczych zdań w widoku ćwiczenia i bibli
 
 ## Weryfikacja
 
+- Karol potwierdził działanie funkcji i zakończenie sprintu.
 - Nie uruchamiano testów, lintowania ani builda.
 - `git diff --check` nie zgłosił błędów whitespace.

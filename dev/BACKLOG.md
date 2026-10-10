@@ -6,7 +6,7 @@
 | 002 — ukończony technicznie | Gotowe audio ośmiu zdań, przerwy, pętla i sterowanie Media Session | Build, testy składania i lokalny odtwarzacz działają |
 | 003 — zamknięty decyzją Karola | Feed rozmów do serwera, trwała biblioteka, sesje, edycja i kontrola aktualności audio; generowanie audio dokończone w sprincie 004 | Zakres funkcjonalny dostarczony łącznie ze sprintem 004; test iPhone'a pozostaje do wykonania |
 | 004 — zamknięty decyzją Karola | Audio własnych zestawów, cisza 1,5 × czas mowy bez dodatkowej sekundy, ponowne generowanie po edycji i odtwarzanie w pętli | Implementacja techniczna ukończona; test iPhone'a i demonstracja nie są potwierdzone w dokumentacji |
-| 005 — zaimplementowany, do weryfikacji | Odsłuchiwanie pojedynczego zdania z podglądu zestawu obok odtwarzania całości | Każde zdanie można odtworzyć osobno; całość nadal działa; aktualność audio jest zachowana |
+| 005 — zamknięty potwierdzeniem Karola | Odsłuchiwanie pojedynczego zdania z podglądu zestawu obok odtwarzania całości | Funkcja działa; Karol potwierdził zakończenie sprintu 2026-10-10 |
 | 006 — draft, później | Cykliczny eksport bazy do miejsca niezależnego od Sites | Automatyczne kopie dostępne poza Sites i sprawdzone odtworzenie biblioteki; szczegóły do uzgodnienia |
 
 ## Otwarte funkcje
@@ -17,4 +17,4 @@
 
 Na każdym review można zmienić kolejność i zakres. Sprint to spójny przyrost, nie deklaracja liczby dni.
 
-[Draft PRD sprintu 005](sprint-005/PRD.md): odsłuchiwanie zdań pojedynczo. [Wcześniejszy draft kopii bazy](sprint-006/PRD.md) zachowano jako późniejszy temat; częstotliwość, magazyn kopii i retencja pozostają do uzgodnienia.
+[Sprint 005 — wynik i review](sprint-005/PRD.md): odsłuchiwanie zdań pojedynczo, zamknięte potwierdzeniem Karola. [Draft sprintu 006](sprint-006/PRD.md) dotyczy cyklicznych kopii bazy; częstotliwość, magazyn kopii i retencja pozostają do uzgodnienia.

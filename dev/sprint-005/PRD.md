@@ -2,7 +2,7 @@
 
 Data: 2026-10-10. Właściciel produktu: Karol.
 
-Status: zaimplementowany; weryfikacja funkcjonalna nie została wykonana.
+Status: zamknięty 2026-10-10 po potwierdzeniu Karola, że funkcja działa i sprint jest skończony. Szczegóły: [wynik](RESULT.md) i [review](REVIEW.md).
 
 ## Potrzeba
 
