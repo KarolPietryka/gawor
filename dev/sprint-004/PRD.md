@@ -31,7 +31,7 @@ Na podstawie dokumentacji sprintów 001–003 i przeglądu kodu przy lokalnym HE
 - Skrypt Python generuje fixture przez Edge TTS i składa audio z użyciem ffmpeg. To nie jest podłączony backend generujący nagrania nowych sesji.
 - Dynamiczny dostawca TTS nie został wybrany; magazyn generowanych plików, np. R2, nie został uruchomiony.
 - Import w interfejsie wymaga wklejenia JSON-a. Nie ma automatycznego połączenia rozmowy z biblioteką ani rozmowy głosowej w aplikacji.
-- Sprint 003 pozostaje częściowy. Sprint 004 przejmuje brakujące generowanie audio; nie oznacza to zamknięcia sprintu 003 ani akceptacji całego MVP.
+- Sprint 003 i 004 zostały zamknięte decyzją Karola 2026-10-10. Sprint 004 przejął brakujące generowanie audio; zamknięcie nie oznacza, że nieudokumentowane demonstracje lub testy urządzenia zostały wykonane.
 - W dokumentacji zapisano wcześniejsze udane sprawdzenia builda i lokalnej bazy. Podczas przygotowania tego PRD nie uruchamiano ich ponownie. Test iPhone/iOS pozostaje niewykonany.
 
 ## Zakres funkcjonalny

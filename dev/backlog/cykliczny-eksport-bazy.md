@@ -1,8 +1,8 @@
-# Sprint 006 — cykliczny eksport bazy danych
+# Kandydat backlogu — cykliczny eksport bazy danych
 
 Data: 2026-09-16. Właściciel produktu: Karol.
 
-Status: draft do dopracowania przed realizacją. Wyłącznie dokumentacja; nie wdrożono eksportu ani harmonogramu.
+Status: przyszły kandydat, nieprzypisany do sprintu. To wyłącznie propozycja; nie wdrożono eksportu ani harmonogramu.
 
 ## Potrzeba i decyzja Karola
 

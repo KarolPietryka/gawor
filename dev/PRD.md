@@ -1,10 +1,10 @@
 # PRD — Gawor
 
-Wersja 0.2 · aktualizacja 2026-09-16 · Właściciel produktu / interesariusz: Karol
+Wersja 0.2 · aktualizacja 2026-10-18 · Właściciel produktu / interesariusz: Karol
 
 Ostatnio zakończony przyrost: [sprint 005 — odsłuchiwanie pojedynczych zdań](sprint-005/PRD.md). Karol potwierdził, że funkcja działa i sprint jest skończony; wynik i review są zapisane w katalogu sprintu.
 
-Kolejny temat w backlogu: [draft sprintu 006 — cykliczne kopie bazy](sprint-006/PRD.md). Częstotliwość, magazyn kopii i retencja pozostają do ustalenia.
+Karol potwierdził 2026-10-18, że wszystkie dotychczasowe sprinty są zamknięte. Niewykonane testy urządzenia pozostają zadaniami eksploatacyjnymi. Kolejny zakres to przycisk uruchamiania zestawu bezpośrednio z jego wiersza w Bibliotece.
 
 ## Problem
 
