@@ -1,6 +1,6 @@
 # Wynik prac — sprint 003
 
-Status: częściowy przyrost gotowy do review biblioteki. Sprint nie jest jeszcze zamknięty z powodu braku dynamicznej syntezy nowych zestawów.
+Status: zamknięty decyzją Karola z 2026-10-10. Biblioteka i trwały zapis powstały w tym sprincie; brakujące generowanie audio dostarczono w sprincie 004. Test iPhone'a pozostaje niewykonany według dostępnych zapisów.
 
 Zrobione:
 

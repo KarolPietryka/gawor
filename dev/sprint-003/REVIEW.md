@@ -1,6 +1,6 @@
 # Review sprintu 003
 
-Status: gotowy do demonstracji biblioteki i decyzji o syntezie audio.
+Status: zamknięty decyzją Karola z 2026-10-10. Brakującą syntezę audio dostarczył sprint 004. Demonstracja biblioteki i test iPhone'a nie są potwierdzone w dokumentacji.
 
 ## Scenariusz demonstracji
 
@@ -11,9 +11,9 @@ Status: gotowy do demonstracji biblioteki i decyzji o syntezie audio.
 5. Potwierdzić komunikat, że wcześniejsze audio zostało unieważnione.
 6. Wybrać zestaw demonstracyjny i sprawdzić odtwarzanie istniejącego MP3.
 
-## Decyzja potrzebna od Karola
+## Decyzja historyczna
 
-Przed domknięciem sprintu trzeba wybrać sposób generowania nowych nagrań. Docelowy wariant wymaga usługi TTS wywoływanej przez backend oraz miejsca na pliki audio, najpewniej R2. Obecny mechanizm Edge TTS pozostaje narzędziem do jednorazowego fixture, nie produkcyjnym backendem.
+Wymaganie wyboru dostawcy TTS zostało rozwiązane w sprincie 004.
 
 ## Akceptacja
 

@@ -19,3 +19,7 @@ python src/audio/assemble.py dev/sprint-001/sentences.json CLIP_DIR app/public/a
 Generator tworzy również manifest `practice.json`, z czasami zdań i przerw. Jego domyślna przerwa wynosi 1,5× czas mowy bez dodatkowej sekundy. Jest to narzędzie do fixture; aplikacja korzysta z manifestów poszczególnych zestawów zapisanych w R2.
 
 Nie używamy przeglądarkowego speechSynthesis jako zamiennika testu gotowego pliku. Brak usługi syntezy i brak testu na iPhonie oznaczają, że sprint nie jest jeszcze ukończony.
+
+### Lokalna synteza OpenAI
+
+Skopiuj `.dev.vars.example` do `.dev.vars`, wpisz w nim swój `OPENAI_API_KEY` i uruchom ponownie `npm run dev`. Plik `.dev.vars` jest ignorowany przez Git. Klucz jest odczytywany wyłącznie w lokalnym Workerze i nie trafia do przeglądarki. Lokalny podgląd wymaga także działającego bindingu D1 (`GAWOR_DB`) i R2 (`GAWOR_AUDIO`).

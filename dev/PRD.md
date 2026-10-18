@@ -2,9 +2,9 @@
 
 Wersja 0.2 · aktualizacja 2026-09-16 · Właściciel produktu / interesariusz: Karol
 
-Aktualny przyrost: [sprint 004 — powtarzanie własnych zdań](sprint-004/PRD.md). Karol potwierdził priorytet generowania audio własnych zestawów przed automatycznym przesyłaniem zdań z rozmowy. Implementacja techniczna jest opisana w [wyniku sprintu](sprint-004/RESULT.md); demonstracja i test iPhone'a czekają na review.
+Ostatnio zakończony przyrost: [sprint 005 — odsłuchiwanie pojedynczych zdań](sprint-005/PRD.md). Karol potwierdził, że funkcja działa i sprint jest skończony; wynik i review są zapisane w katalogu sprintu.
 
-Kolejny planowany przyrost: [draft sprintu 005 — cykliczny eksport bazy](sprint-005/PRD.md). Karol chce kopii danych niezależnych od Sites; harmonogram, miejsce przechowywania i retencja pozostają do ustalenia.
+Kolejny temat w backlogu: [draft sprintu 006 — cykliczne kopie bazy](sprint-006/PRD.md). Częstotliwość, magazyn kopii i retencja pozostają do ustalenia.
 
 ## Problem
 
