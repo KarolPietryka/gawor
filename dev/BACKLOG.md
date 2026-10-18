@@ -7,6 +7,7 @@
 | 003 — zamknięty decyzją Karola | Trwała biblioteka, sesje, import, edycja i kontrola aktualności | Brakujące generowanie audio dokończono w sprincie 004 |
 | 004 — zamknięty decyzją Karola | Audio własnych zestawów, przerwy 1,5 × czas mowy i pętla | Implementacja ukończona; niepotwierdzony test iPhone'a pozostaje osobnym zadaniem |
 | 005 — zamknięty potwierdzeniem Karola | Odsłuchiwanie pojedynczych zdań | Karol potwierdził działanie i zamknął sprint 2026-10-10 |
+| 006 — aktywny | Uruchamianie zestawu bezpośrednio z wiersza Biblioteki | Ikona w wierszu uruchamia przypisany, aktualny zestaw od początku |
 
 ## Otwarte funkcje
 

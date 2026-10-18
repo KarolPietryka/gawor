@@ -6,6 +6,8 @@ Ostatnio zakończony przyrost: [sprint 005 — odsłuchiwanie pojedynczych zdań
 
 Karol potwierdził 2026-10-18, że wszystkie dotychczasowe sprinty są zamknięte. Niewykonane testy urządzenia pozostają zadaniami eksploatacyjnymi. Kolejny zakres to przycisk uruchamiania zestawu bezpośrednio z jego wiersza w Bibliotece.
 
+Aktywny zakres jest zapisany w [sprint 006](sprint-006/PRD.md).
+
 ## Problem
 
 Karol uczy się niemieckiego przez naturalną rozmowę z agentem. Agent pomaga i na komendę zapisuje przydatne zdania. Obecnie zdania pozostają w historii poszczególnych czatów: trudno do nich wrócić, a ćwiczenie wymaga dodatkowej pracy.
