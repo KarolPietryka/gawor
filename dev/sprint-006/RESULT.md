@@ -15,3 +15,4 @@ Status: implementacja gotowa; oczekuje na informację zwrotną Karola.
 - `git diff --check` — bez błędów whitespace.
 - `npm.cmd run lint` — nie przechodzi. Zgłasza liczne istniejące problemy w komponentach UI i pliku `app/page.tsx`, m.in. reguły dostępności i React Compiler; wymaga osobnego uporządkowania.
 - Ręczny test na iPhonie pominięty na wyraźną prośbę Karola z 2026-10-18.
+- Deploy został podjęty na polecenie Karola, ale Cloudflare odrzucił publikację Workera: binding D1 używa placeholderowego ID, ponieważ lokalne zmienne `GAWOR_D1_DATABASE_NAME`, `GAWOR_D1_DATABASE_ID` i `GAWOR_R2_BUCKET_NAME` nie są skonfigurowane. Worker nie został zaktualizowany; statyczne assety zostały przesłane.
