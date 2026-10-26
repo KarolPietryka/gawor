@@ -88,10 +88,12 @@ ol li.active { background: #e3eccf; }
 .number { flex: 0 0 auto; padding-top: 2px; color: #5d6f65; font-size: 14px; font-variant-numeric: tabular-nums; }
 .library-layout { display: grid; grid-template-columns: minmax(210px, .8fr) minmax(0, 2fr); gap: 24px; align-items: start; }
 .session-list { display: grid; gap: 8px; }
-.session-list button { display: grid; gap: 3px; width: 100%; padding: 14px; border: 1px solid var(--border); border-radius: 12px; background: #fff; color: inherit; text-align: left; cursor: pointer; }
-.session-list button:hover, .session-list button.selected { border-color: #3e7e42; box-shadow: 0 0 0 2px rgba(62,126,66,.10); }
-.session-list button span { font-weight: 700; }
-.session-list button small { color: var(--muted-foreground); font-size: 13px; }
+.session-row { display: flex; align-items: stretch; gap: 4px; min-width: 0; padding: 4px; border: 1px solid var(--border); border-radius: 12px; background: #fff; }
+.session-select { display: grid; flex: 1; gap: 3px; min-width: 0; padding: 10px; border: 0; border-radius: 8px; background: transparent; color: inherit; text-align: left; cursor: pointer; }
+.session-select:hover, .session-select.selected { background: #f0f6ee; }
+.session-select span { overflow-wrap: anywhere; font-weight: 700; }
+.session-select small { color: var(--muted-foreground); font-size: 13px; }
+.session-play { flex: 0 0 auto; align-self: center; }
 .session-detail, .import-card { padding: 24px; border: 1px solid var(--border); border-radius: 18px; background: #fff; box-shadow: 0 8px 24px rgba(18,41,32,.05); }
 .audio-state { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-top: 22px; padding: 12px 14px; border-radius: 12px; background: #fff4e3; color: #74430b; font-size: 14px; }
 .audio-state.ready { justify-content: flex-start; background: #eaf5df; color: #28552e; }

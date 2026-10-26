@@ -1,46 +1,33 @@
-# Sprint 006 — cykliczny eksport bazy danych
+# Sprint 006 — uruchamianie zestawu z wiersza Biblioteki
 
-Data: 2026-09-16. Właściciel produktu: Karol.
+Data: 2026-10-18. Właściciel produktu: Karol.
 
-Status: draft do dopracowania przed realizacją. Wyłącznie dokumentacja; nie wdrożono eksportu ani harmonogramu.
+Status: aktywny. Zakres potwierdzony przez Karola; ręczna weryfikacja na iPhonie przed commitem/pushem jest dla tego sprintu pominięta na jego prośbę.
 
-## Potrzeba i decyzja Karola
+## Potrzeba
 
-Karol chce cyklicznego eksportu bazy danych, ponieważ nie chce polegać wyłącznie na Sites jako miejscu utrzymywania projektu i danych. Celem jest posiadanie kopii, z której można odzyskać bibliotekę również przy utracie dostępu do aplikacji lub jej hostingu.
+Aby uruchomić zestaw z Biblioteki, trzeba go wybrać, a następnie użyć przycisku „Ćwicz” w szczegółach. Na długiej liście wymaga to dodatkowego przejścia i przewijania. Karol chce mieć ikonę uruchamiania przy każdym wierszu zestawu.
 
-Potwierdzony zakres to cykliczny eksport bazy. Poniższe szczegóły są propozycją realizacji i wymagają doprecyzowania przed implementacją.
+## Zakres
 
-## Proponowany zakres
+- Każdy wiersz zestawu w Bibliotece ma ikonę uruchomienia obok tytułu i metadanych.
+- Ikona uruchamia przypisany do wiersza zestaw od początku, przechodząc do widoku Ćwiczeń.
+- Przycisk wyboru wiersza i szczegóły zestawu nadal działają niezależnie od ikony uruchomienia.
+- Nie uruchamia się brakujące, nieaktualne ani niekompletne audio.
+- Zachować dotychczasowy przycisk „Ćwicz” w szczegółach.
 
-- Automatyczny, cykliczny eksport trwałej bazy używanej przez aplikację. Obecnie jest to Cloudflare D1; przed wdrożeniem ustalić właściwą instancję i środowisko, aby nie eksportować wyłącznie lokalnej bazy testowej.
-- Eksport schematu oraz wszystkich danych potrzebnych do odtworzenia biblioteki: sesji, zdań, zestawów, ich powiązań, słownictwa i metadanych audio. Uwzględnić także tabele dodane w kolejnych migracjach.
-- Zapis kopii poza Sites i poza samym środowiskiem aplikacji, z dostępem pozostającym pod kontrolą Karola. Dokładny magazyn nie został wybrany.
-- Wersjonowane kopie z datą wykonania i uzgodnioną retencją; nie nadpisywać jedynej dobrej kopii nieudanym lub pustym eksportem.
-- Informacja o ostatniej udanej kopii oraz wykrywanie nieudanego lub pominiętego wykonania. Sposób sygnalizacji do ustalenia.
-- Krótka instrukcja odzyskania i próbne odtworzenie w oddzielnej bazie, bez nadpisywania bazy używanej przez aplikację.
+## Kryteria akceptacji
 
-Harmonogram powinien działać bez otwartej przeglądarki i bez aktywnej sesji agenta. Należy rozważyć uruchamianie go poza hostingiem aplikacji, aby awaria Sites nie zatrzymywała również mechanizmu kopii.
+1. Każdy wiersz Biblioteki ma osobny, dostępny klawiaturą przycisk z etykietą opisującą uruchamiany zestaw.
+2. Uruchomienie z wiersza wybiera właściwy zestaw, otwiera widok Ćwiczeń i rozpoczyna pętlę od początku po przygotowaniu właściwego odtwarzacza.
+3. Wiersz można nadal wybrać bez uruchamiania audio.
+4. Brak aktualnego audio lub manifestu z osią czasu zgodną z liczbą zdań wyłącza przycisk uruchomienia.
+5. Nie są zagnieżdżone przyciski HTML; wybór wiersza i uruchomienie zestawu są osobnymi kontrolkami.
+6. Przycisk „Ćwicz” w szczegółach nadal przechodzi do widoku Ćwiczeń zgodnie z dotychczasowym zachowaniem.
+7. Build aplikacji kończy się powodzeniem; wynik lintowania jest odnotowany w wyniku sprintu. Ręczny test iPhone'a nie jest wymagany w tym sprincie na wyraźną prośbę Karola z 2026-10-18.
 
-## Otwarte decyzje
+## Decyzje implementacyjne
 
-1. Częstotliwość i dopuszczalna utrata najnowszych zmian. Propozycja startowa: raz dziennie, do potwierdzenia.
-2. Docelowe miejsce kopii, niezależny dostęp Karola oraz ewentualne koszty.
-3. Czas przechowywania i liczba wersji. Propozycja startowa: 30 dziennych kopii, do potwierdzenia.
-4. Format eksportu nadający się do odtworzenia schematu i danych oraz sposób zabezpieczenia kopii i poświadczeń.
-5. Miejsce uruchamiania harmonogramu i sposób sygnalizacji błędów. Ten draft nie upoważnia do wysyłania wiadomości ani podłączania zewnętrznych kont.
-6. Zakres zabezpieczenia plików audio po sprincie 004: osobna kopia plików czy ponowna synteza na podstawie zachowanej bazy. Eksport bazy obejmuje metadane i odnośniki, ale **nie zawartość zewnętrznych plików audio**; sam eksport D1 nie jest pełną kopią nagrań.
-
-## Proponowane kryteria zakończenia
-
-1. Eksport wykonuje się automatycznie zgodnie z uzgodnionym harmonogramem, bez otwartej aplikacji.
-2. Karol może pobrać kopię bez korzystania z Sites.
-3. Kopia zawiera schemat i dane biblioteki wraz z relacjami; ma datę wykonania i identyfikację źródłowej bazy.
-4. Nieudane wykonanie jest wykrywalne i nie usuwa ostatniej poprawnej kopii; historia odpowiada ustalonej retencji.
-5. Próbne odtworzenie do oddzielnej bazy kończy się odczytem sesji, zdań i zestawów oraz sprawdzeniem ich relacji.
-6. Instrukcja opisuje dostęp do kopii, odtworzenie oraz to, czy i jak odzyskuje się nagrania.
-
-## Przekazanie dla nowego agenta
-
-Najpierw sprawdź wynik sprintu 004 i aktualny model w `app/db/schema.ts` oraz migracje w `app/drizzle/`. Ustal, gdzie faktycznie są baza i pliki audio oraz jakie niezależne możliwości eksportu są dostępne. Nie zakładaj, że kopia kodu projektu zawiera dane D1 lub wygenerowane nagrania.
-
-Przed wdrożeniem doprecyzuj otwarte decyzje z Karolem. To propozycja kolejnego sprintu, nie polecenie uruchomienia usługi w ramach przygotowania dokumentacji sprintu 004. Zapisz wyniki eksportu i próbnego odtworzenia w `RESULT.md`, a ocenę użytkownika w `REVIEW.md` dopiero po ich wykonaniu.
+- Kliknięcie ikony zaznacza zestaw i przechodzi do widoku Ćwiczeń; odtwarzanie startuje dopiero po aktualizacji wybranego zestawu, aby nie użyć stanu audio poprzedniej sesji.
+- Użyć istniejącej pętli odtwarzacza oraz złożonego audio zestawu. Nie wprowadzać osobnego kanału odtwarzania.
+- Ikona ma dostępny opis zawierający tytuł zestawu; przycisk jest wyłączony, jeśli audio lub manifest nie są aktualne/kompletne.

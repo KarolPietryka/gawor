@@ -10,6 +10,6 @@ Kryteria przyrostu:
 - Wszystkie osiem zdań obecne w nagraniu w tej samej kolejności co na ekranie.
 - Cisza po każdym zdaniu, również ósmym, jest częścią audio.
 - Co najmniej dwa obiegi i 15 minut odtwarzania przy zablokowanym ekranie sprawdzone przez Karola.
-- Wynik i feedback zapisane; status przed testem telefonu to „do review”, nie „zaakceptowany”.
+- Sprint zamknięty decyzją Karola 2026-10-18; wynik historyczny zachowuje informację, że test telefonu nie został udokumentowany.
 
 Nie obejmuje: działającego agenta, mikrofonu, kont użytkowników i automatycznego zapisu zdań z rozmowy. Nie pokazujemy atrap tych funkcji jako działających.

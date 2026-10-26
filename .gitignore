@@ -13,3 +13,4 @@ dist/
 .site-publish/
 *.tar.gz
 node-v*-win-x64/
+/_bmad/config.user.toml

@@ -41,4 +41,4 @@ Obecnie można odtworzyć cały zestaw ćwiczeniowy jako całość, zwykle w pę
 
 ## Późniejszy temat
 
-Wcześniejszy draft cyklicznych kopii bazy został zachowany jako [Sprint 006](../sprint-006/PRD.md). Nie jest częścią zakresu tego sprintu.
+Draft cyklicznego eksportu bazy został przeniesiony do [kandydatów backlogu](../backlog/cykliczny-eksport-bazy.md). Nie jest częścią zakresu tego sprintu.

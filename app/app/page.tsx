@@ -109,6 +109,7 @@ export default function Home() {
   const sentenceEnd = useRef<number | null>(null);
   const commandId = useRef(0);
   const startLoopRef = useRef<(() => void) | null>(null);
+  const pendingRowStartId = useRef<string | null>(null);
   const currentAudioUrl = useRef<string | null>(null);
   const [sessions, setSessions] = useState<PracticeSession[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -156,6 +157,21 @@ export default function Home() {
   const audioReady = Boolean(
     activeAudioUrl && timeline.length === activeSentences.length,
   );
+
+  useEffect(() => {
+    if (!selected || pendingRowStartId.current !== selected.id || !audioReady)
+      return;
+    pendingRowStartId.current = null;
+    startLoopRef.current?.();
+  }, [audioReady, selected, view]);
+
+  function startSessionFromLibrary(session: PracticeSession) {
+    if (!session.practice_set.audio?.is_current) return;
+    pendingRowStartId.current = session.id;
+    setSelectedId(session.id);
+    setView('practice');
+    setPosition(0);
+  }
 
   async function loadSessions(preferId?: string) {
     try {
@@ -823,17 +839,34 @@ export default function Home() {
             <div className="library-layout">
               <aside className="session-list" aria-label="Zapisane sesje">
                 {sessions.map((session) => (
-                  <button
-                    key={session.id}
-                    className={session.id === selectedId ? 'selected' : ''}
-                    onClick={() => setSelectedId(session.id)}
-                  >
-                    <span>{session.practice_set.title}</span>
-                    <small>
-                      {new Date(session.created_at).toLocaleDateString('pl-PL')}{' '}
-                      · {session.sentences.length} zdań
-                    </small>
-                  </button>
+                  <div className="session-row" key={session.id}>
+                    <button
+                      className={`session-select${session.id === selectedId ? ' selected' : ''}`}
+                      onClick={() => setSelectedId(session.id)}
+                      aria-pressed={session.id === selectedId}
+                    >
+                      <span>{session.practice_set.title}</span>
+                      <small>
+                        {new Date(session.created_at).toLocaleDateString('pl-PL')}{' '}
+                        · {session.sentences.length} zdań
+                      </small>
+                    </button>
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      className="session-play"
+                      aria-label={`Uruchom zestaw: ${session.practice_set.title}`}
+                      title="Uruchom zestaw"
+                      disabled={
+                        !session.practice_set.audio?.is_current ||
+                        session.practice_set.audio.manifest?.timeline.length !==
+                          session.sentences.length
+                      }
+                      onClick={() => startSessionFromLibrary(session)}
+                    >
+                      <Play />
+                    </Button>
+                  </div>
                 ))}
               </aside>
               <div className="session-detail">

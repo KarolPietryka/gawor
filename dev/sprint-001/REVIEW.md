@@ -1,6 +1,6 @@
 # Review sprintu 001
 
-Status: oczekuje na przygotowanie demonstracji i test interesariusza.
+Status: zamknięty decyzją Karola 2026-10-18. Test iPhone'a i feedback nie zostały udokumentowane.
 
 ## Test na iPhonie
 
@@ -12,12 +12,12 @@ Do zapisania: model telefonu, wersja iOS, Safari czy aplikacja z ekranu główne
 4. Odblokuj ekran, zatrzymaj i wznów.
 5. Powtórz test po dodaniu aplikacji do ekranu głównego.
 
-Wyniki: jeszcze nie przeprowadzono.
+Wyniki testu iPhone'a: nie przeprowadzono według dostępnej dokumentacji.
 
 ## Feedback Karola
 
-Jeszcze nie otrzymano. Do omówienia: wystarczający czas na powtórzenie, naturalność głosu, niezawodność przy blokadzie, ewentualne zmiany przed kolejnym sprintem.
+Brak dodatkowego feedbacku w dokumentacji. Karol zamknął sprint; nie zmienia to statusu nieprzeprowadzonych testów.
 
 ## Decyzja o kolejnym sprincie
 
-Oczekuje na review. Nie rozpoczęto sprintu 002.
+Sprint 002 został rozpoczęty i zamknięty; sprinty 001–005 są zamknięte.

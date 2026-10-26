@@ -1,6 +1,6 @@
 # Wynik prac — sprint 001, 2026-09-12
 
-Status: częściowy przyrost, do oceny kierunku. Sprint nie jest zaakceptowany ani ukończony.
+Status: sprint zamknięty decyzją Karola 2026-10-18. Historyczny przyrost był częściowy; nie oznacza to wykonania testu iPhone'a.
 
 Gotowe:
 - PRD, backlog, zapis ustaleń i scenariusz review w `dev`.
@@ -15,4 +15,4 @@ Nieukończone:
 - Nie opublikowano aplikacji. Utworzony prywatny projekt Sites zachowany w `app/.openai/hosting.json`; ponownie użyć tego samego ID.
 - Brak testu na iPhonie i brak weryfikacji działania w tle.
 
-Feedback: Karol poprosił o ograniczenie zużycia tokenów i szybkie pokazanie efektu. Dalsze prace mają być krótkie, skupione na widocznym przyroście. Nie rozpoczynamy sprintu 002 przed rozmową.
+Feedback: Karol poprosił o ograniczenie zużycia tokenów i szybkie pokazanie efektu. Sprint 002 i kolejne zostały zrealizowane i są zamknięte. Test iPhone'a dla tego prototypu nie został odnotowany.
