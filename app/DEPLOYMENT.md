@@ -50,3 +50,37 @@ Run commands from `app/` in PowerShell:
 
 Never commit `.dev.vars`, Cloudflare credentials, or generated `.wrangler`
 state.
+
+## Local Worker startup
+
+The local Worker uses a separate local D1 database and local R2 storage. It
+does not use the production database unless a command explicitly includes
+`--remote`.
+
+After `npm run build`, start the local Worker with `npm run start`. On a fresh
+checkout, initialize the local D1 database first. Run these commands from
+`app/`:
+
+```powershell
+npx wrangler d1 execute gawor --local --command "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name;" --config dist/server/wrangler.json
+```
+
+If the query returns no tables, apply the migrations in order:
+
+```powershell
+npx wrangler d1 execute gawor --local --file=drizzle/0000_flowery_stranger.sql --config dist/server/wrangler.json
+npx wrangler d1 execute gawor --local --file=drizzle/0001_secret_hex.sql --config dist/server/wrangler.json
+```
+
+Do not replay these SQL files against a database that already has the app
+tables. This manual bootstrap is needed because the local database is separate
+from the existing production D1 and may start empty. If `/` returns `200` but
+`/api/sessions` returns `503` with `no such table: sessions`, check the local
+`sqlite_master` table list and initialize only if it is empty. Verify startup
+with:
+
+```powershell
+curl.exe -i http://127.0.0.1:8787/api/sessions
+```
+
+The API should return `200`. Local D1 starts with no production user data.

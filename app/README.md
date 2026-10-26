@@ -2,6 +2,8 @@
 
 Sprint 001. Plan produktu i dziennik: `../dev/`.
 
+Procedura wdrażania i lokalnego uruchamiania Workera (w tym inicjalizacja lokalnej D1): [`DEPLOYMENT.md`](DEPLOYMENT.md).
+
 Wymagane środowisko: Node >=22.13, npm. `npm run dev` uruchamia podgląd, `npm run build` buduje wersję wdrożeniową.
 
 Odtwarzacz używa jednego elementu HTML audio z `loop`. Cisza jest w pliku, bez timerów JavaScript. Media Session udostępnia Start/Pauza systemowi. `timeupdate` aktualizuje wyłącznie tekst na ekranie i nie steruje odtwarzaniem.
