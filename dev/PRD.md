@@ -1,8 +1,8 @@
 # PRD — Gawor
 
-Wersja 0.2 · aktualizacja 2026-10-18 · Właściciel produktu / interesariusz: Karol
+Wersja 0.2 · aktualizacja 2026-10-28 · Właściciel produktu / interesariusz: Karol
 
-Ostatnio zakończony przyrost: [sprint 005 — odsłuchiwanie pojedynczych zdań](sprint-005/PRD.md). Karol potwierdził, że funkcja działa i sprint jest skończony; wynik i review są zapisane w katalogu sprintu.
+Ostatnio zakończony przyrost: [sprint 007 — ukrywanie niemieckich zdań na liście Ćwiczeń](sprint-007/PRD.md). Karol po wdrożeniu na produkcję potwierdził sprawdzenie funkcji i zamknął sprint 2026-10-28; wynik i review są zapisane w katalogu sprintu.
 
 Karol potwierdził 2026-10-18, że wszystkie dotychczasowe sprinty są zamknięte. Niewykonane testy urządzenia pozostają zadaniami eksploatacyjnymi. Kolejny zakres to przycisk uruchamiania zestawu bezpośrednio z jego wiersza w Bibliotece.
 

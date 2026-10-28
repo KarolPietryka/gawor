@@ -7,12 +7,14 @@ Pracujemy przyrostowo: plan sprintu → implementacja → weryfikacja → demons
 - [Sprint 004 — PRD i przekazanie](sprint-004/PRD.md) — uzgodniony zakres powtarzania własnych zdań; punkt startowy dla nowego agenta.
 - [Sprint 005 — PRD, wynik i review](sprint-005/PRD.md) — osobne odtwarzanie każdego zdania; Karol potwierdził działanie i zamknął sprint 2026-10-10.
 - [Sprint 006 — PRD, wynik i review](sprint-006/PRD.md) — uruchamianie zestawu bezpośrednio z wiersza Biblioteki; aktywny.
-- [Sprint 007 — PRD i wynik](sprint-007/PRD.md) — przełącznik ukrywający niemieckie zdania na dolnej liście Ćwiczeń; wdrożony na produkcję 2026-10-28, test ręczny pominięty na polecenie Karola.
+- [Sprint 007 — PRD, wynik i review](sprint-007/PRD.md) — przełącznik ukrywający niemieckie zdania na dolnej liście Ćwiczeń; Karol sprawdził funkcję na produkcji i zamknął sprint 2026-10-28.
 - [Kandydaci do przyszłych sprintów](BACKLOG.md) — w tym cykliczny eksport bazy przeniesiony z draftu sprintu 005.
 - [Ustalenia początkowe](decisions/2026-09-12-kickoff.md).
 - Każdy sprint ma osobny katalog `sprint-NNN` z planem, wynikiem i review. Feedback zapisujemy jako fakty dopiero po wypowiedzi interesariusza. Akceptacji nie domniemujemy.
 
-Status: sprinty 001–005 zamknięte decyzją Karola; sprint 006 jest aktywny. Testy urządzenia niepotwierdzone w dokumentacji pozostają zadaniami eksploatacyjnymi, a nie otwartymi sprintami.
+Status: sprinty 001–005 i 007 zamknięte decyzją Karola; sprint 006 jest aktywny. Testy urządzenia niepotwierdzone w dokumentacji pozostają zadaniami eksploatacyjnymi, a nie otwartymi sprintami.
+
+2026-10-28: Po wdrożeniu sprintu 007 Karol potwierdził: „ok sprawdzone. Sprint zamkniety”. Sprint 007 zamknięty; [review](sprint-007/REVIEW.md).
 
 2026-10-10: Karol potwierdził, że odsłuchiwanie pojedynczych zdań działa, i zamknął sprint 005. Testów automatycznych nie uruchamiano.
 

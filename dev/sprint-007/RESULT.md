@@ -2,7 +2,7 @@
 
 Data: 2026-10-28.
 
-Status: wdrożony na produkcję 2026-10-28; build i review zakończone. Karol jawnie zwolnił sprint z testu ręcznego i polecił wykonać commit, push i wdrożenie produkcyjne.
+Status: zamknięty potwierdzeniem Karola 2026-10-28 po sprawdzeniu funkcji na produkcji: „ok sprawdzone. Sprint zamkniety”. Build i review zakończone; wcześniejszy test ręczny przed wydaniem pominięto na jego wyraźne polecenie.
 
 ## Zmiana
 
@@ -20,13 +20,13 @@ Status: wdrożony na produkcję 2026-10-28; build i review zakończone. Karol ja
 - `git diff --check`: bez błędów po implementacji i przy końcowej kontroli przed przekazaniem do testu.
 - Niezależne review wskazało kontrast tłumaczenia w aktywnym wierszu (4,37:1); przyciemniono tekst do `#52645a` (5,16:1). Pozostałe uwagi dotyczyły uzupełnienia wyniku, aktualizacji statusów i dopisania testu VoiceOver; zostały uwzględnione.
 - Automatyczna weryfikacja UI przez Computer Use została zatrzymana przez narzędzie: nie udało się wiarygodnie ustalić URL bieżącej przeglądarki Windows. Nie wykonano interakcji i nie uznano testu UI za zaliczony.
-- Test Karola na iPhonie, w tym ukrycie/odsłonięcie, polskie teksty, reset po odświeżeniu, układ, VoiceOver i ciągłość audio: niewykonany, pominięty na wyraźne polecenie Karola z 2026-10-28; nie jest bramką wydania tego sprintu.
+- Test ręczny przed wydaniem pominięto na wyraźne polecenie Karola z 2026-10-28. Po wdrożeniu Karol potwierdził sprawdzenie funkcji i zamknięcie sprintu. Nie podał urządzenia ani listy wykonanych przypadków; nie oznaczamy osobno testów iPhone’a, VoiceOver i ciągłości audio jako potwierdzonych.
 
 ## Podgląd lokalny
 
 - Uruchomiono z `app/`: `npm.cmd run start -- --ip 0.0.0.0 --port 8788 --persist-to .wrangler/state`.
 - Jawne `--persist-to` wskazuje istniejący lokalny stan. Bez niego wygenerowana konfiguracja z `dist/server` korzystała z osobnej, pustej bazy i endpoint zwracał 503. Nie było potrzeby migracji ani zapisu danych testowych.
-- Po wskazaniu istniejącego stanu `/api/sessions` zwraca HTTP 200: dwa lokalne zestawy z aktualnymi metadanymi audio. Strona sprawdzona przez adres LAN również zwraca HTTP 200. Odsłuch pozostaje do ręcznego sprawdzenia.
+- Po wskazaniu istniejącego stanu `/api/sessions` zwracał HTTP 200: dwa lokalne zestawy z aktualnymi metadanymi audio. Strona sprawdzona przez adres LAN również zwracała HTTP 200. Sam odsłuch w podglądzie lokalnym nie został potwierdzony.
 - Komputer ma aktywne połączenie Ethernet; Wi-Fi jest rozłączone, więc nie ma aktualnego IPv4 Wi-Fi. Bieżący adres i link do testu przekazano Karolowi w rozmowie, bez utrwalania adresu LAN w repozytorium.
 
 ## Wydanie
@@ -38,3 +38,7 @@ Karol zlecił commit, push i wydanie produkcyjne 2026-10-28, a następnie jednoz
 - Produkcja: https://gawor.karol-pietryka11.workers.dev/.
 - Po wdrożeniu strona i `/api/sessions` zwracają HTTP 200. HTML strony zawiera etykietę „Ukryj niemiecki”; opublikowany plik klienta również zawiera przełącznik i zwraca HTTP 200.
 - Nie wykonywano migracji, zmian sekretów ani zapisu danych produkcyjnych.
+
+## Akceptacja
+
+Karol po wydaniu potwierdził: „ok sprawdzone. Sprint zamkniety”. Sprint 007 jest zamknięty; zapis decyzji jest w [review](REVIEW.md).
