@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { Switch } from '@/components/ui/switch';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -117,6 +118,7 @@ export default function Home() {
     'practice',
   );
   const [playing, setPlaying] = useState(false);
+  const [hideGerman, setHideGerman] = useState(false);
   const [playback, setPlayback] = useState<PlaybackMode>(null);
   const [waiting, setWaiting] = useState(false);
   const [loadingAudio, setLoadingAudio] = useState(false);
@@ -768,8 +770,19 @@ export default function Home() {
             className="sentence-list"
             aria-labelledby="practice-list-title"
           >
-            <div className="section-heading">
-              <h2 id="practice-list-title">W tym zestawie</h2>
+            <div className="section-heading practice-list-heading">
+              <div className="practice-list-title">
+                <h2 id="practice-list-title">W tym zestawie</h2>
+                <label className="practice-hide-german" htmlFor="hide-german">
+                  <Switch
+                    id="hide-german"
+                    aria-labelledby="hide-german-label"
+                    checked={hideGerman}
+                    onCheckedChange={setHideGerman}
+                  />
+                  <span id="hide-german-label">Ukryj niemiecki</span>
+                </label>
+              </div>
               <span>{activeSentences.length} zdań</span>
             </div>
             {activeSentences.length ? (
@@ -787,8 +800,11 @@ export default function Home() {
                     <span className="number">
                       {String(number + 1).padStart(2, '0')}
                     </span>
-                    <span className="practice-sentence-copy" lang="de">
-                      {item.german}
+                    <span className="practice-sentence-copy">
+                      {!hideGerman && <span lang="de">{item.german}</span>}
+                      <span className="practice-sentence-polish" lang="pl">
+                        {item.polish || 'Brak polskiego tłumaczenia'}
+                      </span>
                     </span>
                     <Button
                       variant="ghost"

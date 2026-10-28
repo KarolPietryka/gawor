@@ -8,6 +8,7 @@
 | 004 — zamknięty decyzją Karola | Audio własnych zestawów, przerwy 1,5 × czas mowy i pętla | Implementacja ukończona; niepotwierdzony test iPhone'a pozostaje osobnym zadaniem |
 | 005 — zamknięty potwierdzeniem Karola | Odsłuchiwanie pojedynczych zdań | Karol potwierdził działanie i zamknął sprint 2026-10-10 |
 | 006 — aktywny | Uruchamianie zestawu bezpośrednio z wiersza Biblioteki | Ikona w wierszu uruchamia przypisany, aktualny zestaw od początku |
+| [007 — wydanie zlecone](sprint-007/PRD.md) | Ukrywanie niemieckich zdań na liście Ćwiczeń | Przełącznik zostawia polskie tłumaczenia; po odświeżeniu niemiecki znów widoczny; Karol zwolnił sprint z testu ręcznego |
 
 ## Otwarte funkcje
 

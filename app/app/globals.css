@@ -81,10 +81,14 @@ h3 { margin: 0; font-size: 17px; }
 .section-heading { display: flex; align-items: center; justify-content: space-between; gap: 18px; }
 .section-heading p { margin: 5px 0 0; color: var(--muted-foreground); }
 .section-heading > span { color: #5d6f65; font-size: 14px; }
+.practice-list-heading { flex-wrap: wrap; }
+.practice-list-title { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 18px; }
+.practice-hide-german { display: inline-flex; align-items: center; gap: 9px; min-height: 44px; color: var(--muted-foreground); font-size: 14px; cursor: pointer; }
 ol { list-style: none; padding: 0; margin: 16px 0; }
 ol li { display: flex; gap: 18px; padding: 18px 10px; border-bottom: 1px solid var(--border); border-radius: 6px; }
 ol li.active { background: #e3eccf; }
-.practice-sentence-copy { flex: 1; }
+.practice-sentence-copy { display: grid; flex: 1; gap: 3px; min-width: 0; overflow-wrap: anywhere; }
+.practice-sentence-polish { color: #52645a; font-size: 14px; }
 .number { flex: 0 0 auto; padding-top: 2px; color: #5d6f65; font-size: 14px; font-variant-numeric: tabular-nums; }
 .library-layout { display: grid; grid-template-columns: minmax(210px, .8fr) minmax(0, 2fr); gap: 24px; align-items: start; }
 .session-list { display: grid; gap: 8px; }
