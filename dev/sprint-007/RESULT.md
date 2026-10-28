@@ -2,7 +2,7 @@
 
 Data: 2026-10-28.
 
-Status: implementacja gotowa; build i review zakończone. Karol 2026-10-28 jawnie zwolnił sprint z testu ręcznego i polecił wykonać commit, push i wdrożenie produkcyjne. Wydanie w przygotowaniu.
+Status: wdrożony na produkcję 2026-10-28; build i review zakończone. Karol jawnie zwolnił sprint z testu ręcznego i polecił wykonać commit, push i wdrożenie produkcyjne.
 
 ## Zmiana
 
@@ -32,3 +32,9 @@ Status: implementacja gotowa; build i review zakończone. Karol 2026-10-28 jawni
 ## Wydanie
 
 Karol zlecił commit, push i wydanie produkcyjne 2026-10-28, a następnie jednoznacznie polecił wykonać je bez testu ręcznego. Wydanie korzysta z istniejącego Workera i istniejących bindingów produkcyjnych D1/R2 opisanych w `app/DEPLOYMENT.md`; nie wymaga migracji, tworzenia zasobów ani zmian sekretów.
+
+- Commit funkcji: `10bf8fe4f9dfd5c70f6fe00c5696f6c14e09491a`, wypchnięty na `origin/main`.
+- Wdrożenie: `wrangler deploy --config dist/server/wrangler.json` zakończone powodzeniem; Wrangler potwierdził publikację Workera `gawor`.
+- Produkcja: https://gawor.karol-pietryka11.workers.dev/.
+- Po wdrożeniu strona i `/api/sessions` zwracają HTTP 200. HTML strony zawiera etykietę „Ukryj niemiecki”; opublikowany plik klienta również zawiera przełącznik i zwraca HTTP 200.
+- Nie wykonywano migracji, zmian sekretów ani zapisu danych produkcyjnych.

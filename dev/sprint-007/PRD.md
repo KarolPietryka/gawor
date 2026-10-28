@@ -2,7 +2,7 @@
 
 Data: 2026-10-28. Właściciel produktu: Karol.
 
-Status: zaimplementowany; build i review zakończone. Karol 2026-10-28 jawnie polecił pominąć test ręczny i wykonać commit, push oraz wdrożenie produkcyjne. Zwolnienie z testu dotyczy sprintu 007; nie oznacza zaliczenia testu ani zamknięcia sprintu 006.
+Status: wdrożony na produkcję 2026-10-28; build i review zakończone. Karol jawnie polecił pominąć test ręczny i wykonać commit, push oraz wdrożenie produkcyjne; operacje zakończyły się powodzeniem. Zwolnienie z testu dotyczy sprintu 007; nie oznacza zaliczenia testu ani zamknięcia sprintu 006. Szczegóły w [wyniku sprintu](RESULT.md).
 
 ## Potrzeba
 
